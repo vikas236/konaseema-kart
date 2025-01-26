@@ -137,6 +137,12 @@ function App() {
         >
           {recipes.restaurant2.name}
         </span>
+        <span
+          className="cursor-pointer hover:bg-gray-200 p-3 font-semibold"
+          onClick={menuActivate}
+        >
+          {recipes.restaurant3.name}
+        </span>
       </div>
       <div className="menu_items w-full h-fit flex flex-col items-center overflow-hidden"></div>
     </div>
@@ -145,6 +151,21 @@ function App() {
 
 const recipes = {
   restaurant0: {
+    name: "vinay biryanis",
+    biryanis: [
+      ["dum biryani half", 130],
+      ["dum biryani half", 130],
+      ["dum biryani full", 200],
+      ["dum biryani family", 250],
+      ["dum biryani half", 130],
+      ["dum biryani full", 200],
+      ["dum biryani family", 250],
+      ["fry piece biryani half", 130],
+      ["fry piece biryani full", 180],
+      ["fry piece biryani family", 250],
+    ],
+  },
+  restaurant1: {
     name: "vindhu family restaruant (punjaby dhaba)",
     veg_curries: [
       ["paneer butter masala", 220],
@@ -278,7 +299,7 @@ const recipes = {
       ["bangla paneer", 270],
     ],
   },
-  restaurant1: {
+  restaurant2: {
     name: "sri bhaskara",
     soups: [
       ["veg hot & sour soup", 100],
@@ -596,7 +617,7 @@ const recipes = {
       ["bhaskar special falooda", 180],
     ],
   },
-  restaurant2: {
+  restaurant3: {
     name: "new biryanis",
     all: [
       ["chicken mugalai biryani", 200],
