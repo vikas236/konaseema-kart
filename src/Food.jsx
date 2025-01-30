@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { recipes } from "./data";
+import { useNavigate } from "react-router-dom";
 
 function Food() {
+  const navigate = useNavigate();
+
   const presentFoodCategory = localStorage.getItem("presentFoodCategory");
   const presentRestaurant = localStorage.getItem("presentRestaurant");
   localStorage.setItem(
@@ -105,6 +108,10 @@ function Food() {
       console.error("Error sending order:", error);
       alert("Failed to place order. Please try again.");
     }
+
+    setTimeout(() => {
+      navigate("/");
+    }, 2000);
   }
 
   return (
