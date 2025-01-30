@@ -89,7 +89,7 @@ function Food() {
       )
       .join("\n");
 
-    const message = `🛒 *New Order Received* 🛒\n\n📱 *Phone:* ${phoneNumber}\n\n${orderDetails}\n\n💰 *Total:* ₹${totalAmount}`;
+    const message = `🛒 *New Order Received* 🛒\n\n🏢 *Restaurant:* ${presentRestaurant}\n📱 *Phone:* ${phoneNumber}\n\n${orderDetails}\n\n💰 *Total:* ₹${totalAmount}`;
 
     const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
       message
