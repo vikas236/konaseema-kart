@@ -199,7 +199,7 @@ function Food() {
           value={phoneNumber}
           onChange={(e) => setPhoneNumber(e.target.value)}
         />
-        {error && <span className="text-red-500">{error}</span>}
+        {error && <span className="text-white mb-2">{error}</span>}
 
         <button
           className="py-3 bg-white mb-3 w-full rounded-2xl"
