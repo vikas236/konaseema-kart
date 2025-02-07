@@ -1,5 +1,5 @@
 export async function fetchImages(searchTerm) {
-  const API_KEY = import.meta.env.VITE_PIXARBAY_APIKEY; // Make sure you have your API key configured
+  const API_KEY = import.meta.env.VITE_PIXARBAY_API; // Make sure you have your API key configured
   const URL = `https://pixabay.com/api/?key=${API_KEY}&q=${encodeURIComponent(
     searchTerm
   )}`;

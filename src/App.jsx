@@ -1,49 +1,58 @@
-import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { recipes } from "./data";
+import React, { useState, useEffect, Profiler } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+import Home from "./pages/Home.jsx";
+import Restaurants from "./pages/Restaurants.jsx";
+import Search from "./pages/Search.jsx";
+import Cart from "./pages/Cart.jsx";
+import Admin from "./pages/Admin.jsx";
+import Menu from "./pages/Menu.jsx";
+import Nav from "./pages/Nav.jsx";
+import Profile from "./pages/Profile.jsx";
+import Dock from "./pages/Dock.jsx";
 
 function App() {
-  const navigate = useNavigate();
-
-  const restaurants = [];
-
-  function getRestaurantNames() {
-    Object.values(recipes).forEach((e) => {
-      restaurants.push(e.name);
-    });
-  }
-  getRestaurantNames();
-
-  function redirectToFood() {
-    const buttons = document.querySelectorAll(".restaurants button");
-
-    buttons.forEach((button) => {
-      button.addEventListener("click", (e) => {
-        localStorage.setItem(
-          "presentRestaurant",
-          e.target.innerHTML.toLowerCase()
-        );
-        navigate("/categories");
-      });
-    });
-  }
-  useEffect(() => redirectToFood());
+  const location = useLocation();
+  const [cartItems, setCartItems] = useState(() => {
+    return localStorage.getItem("kk_cart_items")
+      ? JSON.parse(localStorage.getItem("kk_cart_items"))
+      : [];
+  });
 
   return (
-    <div className="restaurants w-full h-fit min-h-100 mt-3 mb-10">
-      <h1 className="text-xl text-center mt-5">Restaurants</h1>
-      <div className="container mt-5 flex flex-wrap gap-3">
-        {restaurants.map((restaurant, index) => (
-          <button
-            key={index} // Use a unique key for each item
-            className="shadow-xl flex border-2 border-orange-400 w-[calc(50%-6px)] min-h-[calc(40dvw-6px)] 
-                     text-center font-semibold rounded-3xl py-5 px-5 cursor-pointer justify-center items-center
-                     active:shadow-none transition-all"
-          >
-            {restaurant}
-          </button>
-        ))}
-      </div>
+    <div className="app w-full overflow-x-hidden overflow-y-scroll py-3">
+      <Nav cartItems={cartItems} setCartItems={setCartItems} />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/home" element={<Home />} />
+        <Route
+          path="/restaurants"
+          element={
+            <Restaurants cartItems={cartItems} setCartItems={setCartItems} />
+          }
+        />
+        <Route
+          path="/restaurants/menu"
+          element={<Menu cartItems={cartItems} setCartItems={setCartItems} />}
+        />
+        <Route path="/search" element={<Search />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/cart"
+          element={<Cart cartItems={cartItems} setCartItems={setCartItems} />}
+        />
+        <Route
+          path="/admin"
+          element={<Admin cartItems={cartItems} setCartItems={setCartItems} />}
+        />
+      </Routes>
+      <Dock cartItems={cartItems} />
     </div>
   );
 }

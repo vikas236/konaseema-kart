@@ -32,7 +32,7 @@ export const recipes = {
     ],
   },
   restaurant1: {
-    name: "vindhu family restaruant (punjaby dhaba)",
+    name: "vindhu family restaruant",
     veg_curries: [
       ["paneer butter masala", 220],
       ["mushroom curry", 220],
