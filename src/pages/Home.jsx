@@ -62,9 +62,9 @@ function SearchBar() {
 
 function Home() {
   const carouselContent = [
-    { name: "banner0", image: "/src/assets/banner0.png" },
-    { name: "banner1", image: "/src/assets/banner1.png" },
-    { name: "banner2", image: "/src/assets/banner2.png" },
+    { name: "banner0", image: "../assets/banner0.png" },
+    { name: "banner1", image: "../assets/banner1.png" },
+    { name: "banner2", image: "../assets/banner2.png" },
   ];
 
   const carouselSettings = {

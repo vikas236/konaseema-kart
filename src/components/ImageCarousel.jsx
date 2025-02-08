@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import Slider from "react-slick";
 
 const Carousel = ({ carouselContent, carouselSettings }) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-
   return (
     <div className="w-full max-w-3xl mt-2 mb-3 rounded-xl overflow-hidden bg-amber-400">
       <Slider {...carouselSettings}>
