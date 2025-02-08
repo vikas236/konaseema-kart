@@ -1,6 +1,9 @@
 import { useEffect } from "react";
 import Carousel from "../components/ImageCarousel";
 import { NavLink } from "react-router-dom";
+import banner0 from "../assets/banner0.png";
+import banner1 from "../assets/banner1.png";
+import banner2 from "../assets/banner2.png";
 
 function HugeOffer() {
   return (
@@ -62,9 +65,9 @@ function SearchBar() {
 
 function Home() {
   const carouselContent = [
-    { name: "banner0", image: "../assets/banner0.png" },
-    { name: "banner1", image: "../assets/banner1.png" },
-    { name: "banner2", image: "../assets/banner2.png" },
+    { name: "banner0", image: banner0 },
+    { name: "banner1", image: banner1 },
+    { name: "banner2", image: banner2 },
   ];
 
   const carouselSettings = {
