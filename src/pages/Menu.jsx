@@ -1,4 +1,4 @@
-import Carousel from "../components/Carousel";
+import Carousel from "../components/Carousel.jsx";
 import { recipes } from "../core/data";
 
 function Menu({ cartItems, setCartItems }) {
@@ -33,7 +33,7 @@ function Menu({ cartItems, setCartItems }) {
         menu_items={menu_items}
         cartItems={cartItems}
         setCartItems={setCartItems}
-      />
+      />{" "}
     </div>
   );
 }

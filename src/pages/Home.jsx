@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import Carousel from "../components/Carousel";
+import Carousel from "../components/ImageCarousel";
 import { NavLink } from "react-router-dom";
 
 function HugeOffer() {
@@ -30,7 +30,7 @@ function PopularChoices() {
   ];
 
   return (
-    <div className="popular_choices mt-4">
+    <div className="popular_choices mt-5">
       <div className="flex items-center flex-wrap gap-3">
         {arr.map((e, index) => (
           <NavLink
@@ -61,23 +61,31 @@ function SearchBar() {
 }
 
 function Home() {
+  const carouselContent = [
+    { name: "banner0", image: "/src/assets/banner0.png" },
+    { name: "banner1", image: "/src/assets/banner1.png" },
+    { name: "banner2", image: "/src/assets/banner2.png" },
+  ];
+
+  const carouselSettings = {
+    dots: false,
+    infinite: true,
+    speed: 500,
+    slidesToShow: 1,
+    slidesToScroll: 1,
+    autoplay: true,
+    autoplaySpeed: 3500,
+  };
+
   return (
     <div className="home w-full h-fit overflow-hidden">
       <h1 className="font-semibold text-center">Home</h1>
+      <Carousel
+        carouselContent={carouselContent}
+        carouselSettings={carouselSettings}
+      />
       {/* <SearchBar /> */}
       <PopularChoices />
-      <div className="popular_categories mt-7">
-        {/* <h1 className="font-semibold text-xl flex items-center justify-between">
-          Popular Categories{" "}
-          <NavLink
-            className="text-xs pr-5 text-gray-400  active:text-[#307a59]"
-            to="/restaurants"
-          >
-            view more
-          </NavLink>
-        </h1> */}
-        {/* <Carousel /> */}
-      </div>
     </div>
   );
 }
