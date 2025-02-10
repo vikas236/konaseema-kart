@@ -63,8 +63,14 @@ function Cart({ cartItems, setCartItems }) {
 
   // Proceed to checkout function
   function proceedToCheckout(e) {
+    const [lat_number, long_number] = JSON.parse(
+      localStorage.getItem("kk_user_location_coordinates")
+    );
+
     let food_order_items = cartItems
-      .map((e) => `${e.name}: ₹${e.price}/-(${e.quantity}), `)
+      .map(
+        (e) => "\n" + JSON.stringify(`${e.name}: ₹${e.price}/-(${e.quantity})`)
+      )
       .join("");
 
     if (cartItems.length > 0) {
@@ -72,6 +78,7 @@ function Cart({ cartItems, setCartItems }) {
       setTimeout(() => {
         if (e.target) e.target.classList.remove("hidden");
       }, 1500);
+
       if (!phone || phone.length < 10) {
         alert("Enter a valid phone number before proceeding.");
         return;
@@ -105,14 +112,15 @@ function Cart({ cartItems, setCartItems }) {
       const message =
         `📦 *New Order Received!* 📦\n\n` +
         `🏠 *Restaurant:* ${restaurantName}\n` +
-        `🍔 *Food:* ${JSON.stringify(food_order_items)}` +
+        `🍔 *Food:* ${food_order_items}` +
         `📞 *Phone:* ${phone}\n` +
         `📍 *Address:* ${location}\n` +
-        `📍 *Find on Google Maps:* https://www.google.com/maps?q=${latitude},${longitude}` +
+        `📍 *Find on Google Maps:* https://www.google.com/maps?q=${lat_number},${long_number}` +
         `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
       const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
         message
       )}&parse_mode=Markdown`;
+
       fetch(telegramUrl)
         .then((response) => response.json())
         .then((data) => {
@@ -120,7 +128,7 @@ function Cart({ cartItems, setCartItems }) {
             alert("Order placed successfully! 📦");
             // Clear the cart
             setCartItems([]);
-            localStorage.removeItem("kk_cart_items"); // Remove cart data from localStorage
+            localStorage.removeItem("kk_cart_items");
             navigate("/restaurants");
           } else {
             alert("Failed to send order details. Please try again.");
@@ -147,6 +155,10 @@ function Cart({ cartItems, setCartItems }) {
         localStorage.setItem(
           "kk_user_location",
           `Lat: ${latitude}, Lng: ${longitude}`
+        );
+        localStorage.setItem(
+          "kk_user_location_coordinates",
+          JSON.stringify([latitude, longitude])
         );
 
         // Reverse geocoding

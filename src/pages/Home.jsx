@@ -64,6 +64,9 @@ function SearchBar() {
 }
 
 function Home() {
+  localStorage.removeItem("kk_user_location");
+  localStorage.removeItem("kk_user_location_coordinates");
+
   const carouselContent = [
     { name: "banner0", image: banner0 },
     { name: "banner1", image: banner1 },
