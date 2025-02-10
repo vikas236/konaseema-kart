@@ -63,75 +63,74 @@ function Cart({ cartItems, setCartItems }) {
 
   // Proceed to checkout function
   function proceedToCheckout(e) {
-    e.currentTarget.classList.add("hidden");
-    setTimeout(() => {
-      if (e.currentTarget) e.currentTarget.classList.remove("hidden");
-    }, 1500);
+    let food_order_items = cartItems
+      .map((e) => `${e.name}: ₹${e.price}/-(${e.quantity}), `)
+      .join("");
 
-    if (!phone || phone.length < 10) {
-      alert("Enter a valid phone number before proceeding.");
-      return;
+    if (cartItems.length > 0) {
+      e.currentTarget.classList.add("hidden");
+      setTimeout(() => {
+        if (e.target) e.target.classList.remove("hidden");
+      }, 1500);
+      if (!phone || phone.length < 10) {
+        alert("Enter a valid phone number before proceeding.");
+        return;
+      }
+      if (!location) {
+        alert("Enable location before proceeding.");
+        return;
+      }
+      const botToken = import.meta.env.VITE_TELEGRAM_BOT_API;
+      const chatId = import.meta.env.VITE_TELEGRAM_CHATID;
+      const restaurantName =
+        localStorage.getItem("kk_active_restaurant") || "Unknown Restaurant";
+      const longitude = localStorage
+        .getItem("kk_user_location")
+        ?.split(", ")[1]
+        .trim();
+      const latitude = localStorage
+        .getItem("kk_user_location")
+        ?.split(", ")[0]
+        .trim();
+      if (!botToken || !chatId) {
+        alert("Missing Telegram API credentials. Check your .env file.");
+        return;
+      }
+      const orderDetails = cartItems
+        .map(
+          (item) =>
+            `${item.name} (x${item.quantity}) - ₹${item.price * item.quantity}`
+        )
+        .join("\n");
+      const message =
+        `📦 *New Order Received!* 📦\n\n` +
+        `🏠 *Restaurant:* ${restaurantName}\n` +
+        `🍔 *Food:* ${JSON.stringify(food_order_items)}` +
+        `📞 *Phone:* ${phone}\n` +
+        `📍 *Address:* ${location}\n` +
+        `📍 *Find on Google Maps:* https://www.google.com/maps?q=${latitude},${longitude}` +
+        `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
+      const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
+        message
+      )}&parse_mode=Markdown`;
+      fetch(telegramUrl)
+        .then((response) => response.json())
+        .then((data) => {
+          if (data.ok) {
+            alert("Order placed successfully! 📦");
+            // Clear the cart
+            setCartItems([]);
+            localStorage.removeItem("kk_cart_items"); // Remove cart data from localStorage
+            navigate("/restaurants");
+          } else {
+            alert("Failed to send order details. Please try again.");
+          }
+        })
+        .catch((error) => {
+          console.error("Error sending message:", error);
+          alert("An error occurred while placing the order.");
+        });
     }
-    if (!location) {
-      alert("Enable location before proceeding.");
-      return;
-    }
-
-    const botToken = import.meta.env.VITE_TELEGRAM_BOT_API;
-    const chatId = import.meta.env.VITE_TELEGRAM_CHATID;
-    const restaurantName =
-      localStorage.getItem("kk_active_restaurant") || "Unknown Restaurant";
-    const longitude = localStorage
-      .getItem("kk_user_location")
-      ?.split(", ")[1]
-      .trim();
-    const latitude = localStorage
-      .getItem("kk_user_location")
-      ?.split(", ")[0]
-      .trim();
-
-    if (!botToken || !chatId) {
-      alert("Missing Telegram API credentials. Check your .env file.");
-      return;
-    }
-
-    const orderDetails = cartItems
-      .map(
-        (item) =>
-          `${item.name} (x${item.quantity}) - ₹${item.price * item.quantity}`
-      )
-      .join("\n");
-
-    const message =
-      `📦 *New Order Received!* 📦\n\n` +
-      `🏠 *Restaurant:* ${restaurantName}\n` +
-      `📞 *Phone:* ${phone}\n` +
-      `📍 *Address:* ${location}\n` +
-      `📍 *Find on Google Maps:* https://www.google.com/maps?q=${latitude},${longitude}` +
-      `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
-
-    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
-      message
-    )}&parse_mode=Markdown`;
-
-    fetch(telegramUrl)
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.ok) {
-          alert("Order placed successfully! 📦");
-
-          // Clear the cart
-          setCartItems([]);
-          localStorage.removeItem("kk_cart_items"); // Remove cart data from localStorage
-          navigate("/restaurants");
-        } else {
-          alert("Failed to send order details. Please try again.");
-        }
-      })
-      .catch((error) => {
-        console.error("Error sending message:", error);
-        alert("An error occurred while placing the order.");
-      });
   }
 
   function detectLocation() {
