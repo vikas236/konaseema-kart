@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 function Nav({ cartItems, setCartItems }) {
   const CartIcon = () => {
     const location = useLocation();
-    const disallowed_pathnames = ["/cart", "/admin"];
+    const disallowed_pathnames = ["/cart", "/admin", "/auth"];
 
     return (
       !disallowed_pathnames.includes(location.pathname) && (
@@ -22,14 +22,15 @@ function Nav({ cartItems, setCartItems }) {
   };
 
   return (
-    location.pathname != "/admin" && (
+    location.pathname != "/admin" ||
+    (location.pathname != "/auth" && (
       <nav className="w-full pt-5 pb-8 flex items-center justify-between">
         <a className="font-bold text-3xl" href="/">
           Konaseema Kart
         </a>
         <CartIcon />
       </nav>
-    )
+    ))
   );
 }
 

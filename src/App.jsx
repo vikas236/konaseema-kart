@@ -16,6 +16,7 @@ import Menu from "./pages/Menu.jsx";
 import Nav from "./pages/Nav.jsx";
 import Profile from "./pages/Profile.jsx";
 import Dock from "./pages/Dock.jsx";
+import Auth from "./pages/Auth.jsx";
 
 function App() {
   const location = useLocation();
@@ -51,6 +52,7 @@ function App() {
           path="/admin"
           element={<Admin cartItems={cartItems} setCartItems={setCartItems} />}
         />
+        <Route path="/auth" element={<Auth />} />
       </Routes>
       <Dock cartItems={cartItems} />
     </div>
