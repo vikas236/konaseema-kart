@@ -594,7 +594,7 @@ export const recipes = {
       ["potato 65", 100],
     ],
   },
-  restaurant3: {
+  restaurant4: {
     name: "Bakery",
     cakes: [
       ["cake (500gm)", 170],
