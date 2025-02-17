@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+		<!--	created with www.mysitemapgenerator.com	-->
+		<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<url>
+	<loc>https://www.konaseemakart.in/</loc>
+	<lastmod>2025-02-17T17:23:27+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://www.konaseemakart.in/cart</loc>
+	<lastmod>2025-02-17T17:23:27+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://www.konaseemakart.in/restaurants/menu</loc>
+	<lastmod>2025-02-17T17:23:27+01:00</lastmod>
+	<priority>0.8</priority>
+</url>
+<url>
+	<loc>https://www.konaseemakart.in/restaurants</loc>
+	<lastmod>2025-02-17T17:23:27+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://www.konaseemakart.in/search</loc>
+	<lastmod>2025-02-17T17:23:27+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://www.konaseemakart.in/profile</loc>
+	<lastmod>2025-02-17T17:23:27+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://www.konaseemakart.in/home</loc>
+	<lastmod>2025-02-17T17:23:27+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://www.konaseemakart.in/admin</loc>
+	<lastmod>2025-02-17T17:23:27+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+<url>
+	<loc>https://www.konaseemakart.in/auth</loc>
+	<lastmod>2025-02-17T17:23:27+01:00</lastmod>
+	<priority>1.0</priority>
+</url>
+</urlset>
