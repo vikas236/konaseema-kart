@@ -59,7 +59,6 @@ const Auth = () => {
     setSignInLoading(true);
     try {
       const provider = new firebase.auth.PhoneAuthProvider();
-      console.log(provider);
       const verificationId = await firebase
         .auth()
         .signInWithPhoneNumber(`+${phoneNumberBackup}`);

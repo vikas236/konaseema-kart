@@ -22,15 +22,14 @@ function Nav({ cartItems, setCartItems }) {
   };
 
   return (
-    location.pathname != "/admin" ||
-    (location.pathname != "/auth" && (
+    (location.pathname != "/admin" || location.pathname != "/auth") && (
       <nav className="w-full pt-5 pb-8 flex items-center justify-between">
         <a className="font-bold text-3xl" href="/">
           Konaseema Kart
         </a>
         <CartIcon />
       </nav>
-    ))
+    )
   );
 }
 
