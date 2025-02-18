@@ -3,7 +3,7 @@ import Slider from "react-slick";
 
 const Carousel = ({ carouselContent, carouselSettings }) => {
   return (
-    <div className="w-full max-w-3xl min-h-[100px] mt-2 mb-3 rounded-xl overflow-hidden bg-amber-400">
+    <div className="w-full max-w-3xl min-h-[100px] mt-2 mb-3 rounded-xl overflow-hidden bg-gray-300">
       <Slider {...carouselSettings}>
         {carouselContent.map((item, index) => (
           <div key={index} className="h-full w-fit cursor-pointer">
