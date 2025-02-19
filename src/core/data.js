@@ -492,7 +492,7 @@ export const recipes = {
       ["avakai chicken mughalai biryani", 250],
       ["gongura chicken mughalai biryani", 250],
       ["mutton biryani", 220],
-      ["button mughalai biryani", 250],
+      ["mutton mughalai biryani", 250],
       ["mutton keema mughalai biryani", 300],
       ["mutton kaaju biryani", 350],
       ["new special mutton biryani", 350],
