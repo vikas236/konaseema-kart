@@ -1,172 +1,167 @@
 import React, { useState, useEffect } from "react";
-import firebase from "firebase/compat/app";
-import "firebase/compat/auth";
-import "firebase/compat/firestore";
+import {
+  getAuth,
+  RecaptchaVerifier,
+  signInWithPhoneNumber,
+  onAuthStateChanged,
+  signOut,
+  PhoneAuthProvider,
+  signInWithCredential,
+} from "firebase/auth";
+import { app } from "../core/firebaseconfig"; // Ensure Firebase is initialized properly
 
-firebase.initializeApp({
-  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
-  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
-  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
-  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
-  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
-  appId: import.meta.env.VITE_FIREBASE_APP_ID,
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
-});
+const auth = getAuth(app);
 
 const Auth = () => {
   const [user, setUser] = useState(null);
   const [phoneNumber, setPhoneNumber] = useState("");
-  const [phoneNumberError, setPhoneNumberError] = useState(null);
-  const [signInLoading, setSignInLoading] = useState(false);
-  const [verificationId, setVerificationId] = useState("");
-  const [phoneNumberBackup, setPhoneNumberBackup] = useState("");
-  const [code, setCode] = useState("");
+  const [verificationId, setVerificationId] = useState(null);
+  const [otp, setOtp] = useState("");
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [otpSent, setOtpSent] = useState(false);
+
+  if (user) console.log(user);
 
   useEffect(() => {
-    const unsubscribe = firebase
-      .auth()
-      .onAuthStateChanged((user) => setUser(user));
-    return () => {
-      unsubscribe();
-      firebase.auth().getUid(); // Revoke the access token when the user signs out
-    };
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      setUser(user);
+    });
+    return () => unsubscribe();
   }, []);
 
-  useEffect(() => {
-    const phone = phoneNumber.replace(/\D+/g, "");
-    if (/^[0-9]{3}-?[0-9]{3}-?[0-9]{4}$/.test(phone)) {
-      setPhoneNumberBackup(phone);
-    }
-  }, [phoneNumber]);
-
-  useEffect(() => {
-    if (!phoneNumberBackup || phoneNumberBackup.length < 10) {
-      setPhoneNumberError(
-        "Invalid phone number format. Please use XXX-XXX-XXXX."
+  const setupRecaptcha = () => {
+    if (!window.recaptchaVerifier) {
+      window.recaptchaVerifier = new RecaptchaVerifier(
+        auth,
+        "recaptcha-container",
+        {
+          size: "invisible",
+          callback: (response) => {
+            console.log("reCAPTCHA solved!");
+          },
+          "expired-callback": () => {
+            console.error("reCAPTCHA expired. Please try again.");
+          },
+        }
       );
-    } else {
-      setPhoneNumberError(null);
     }
-  }, [phoneNumberBackup]);
-
-  const handlePhoneNumberInput = (e) => {
-    setPhoneNumber(e.target.value);
   };
 
   const handlePhoneSignIn = async () => {
-    if (signInLoading || !phoneNumberBackup) return;
-    setSignInLoading(true);
+    setError(null);
+    const formattedPhoneNumber = phoneNumber.trim();
+    if (!/^\d{10}$/.test(formattedPhoneNumber)) {
+      return setError("Enter a valid phone number(e.g., 1234512345)");
+    }
+
+    setLoading(true);
+    setupRecaptcha();
+
     try {
-      const provider = new firebase.auth.PhoneAuthProvider();
-      const verificationId = await firebase
-        .auth()
-        .signInWithPhoneNumber(`+${phoneNumberBackup}`);
-      setVerificationId(verificationId);
-      setPhoneNumberBackup(`+9${phoneNumberBackup.slice(1)}`);
-      setSignInLoading(false);
-    } catch (error) {
-      setError(error.message + "" + "sign in error");
-      setSignInLoading(false);
+      const confirmationResult = await signInWithPhoneNumber(
+        auth,
+        "+91" + formattedPhoneNumber,
+        window.recaptchaVerifier
+      );
+      setVerificationId(confirmationResult.verificationId);
+      setOtpSent(true);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleVerifyCode = async () => {
-    if (signInLoading || !verificationId) return;
-    setSignInLoading(true);
-    try {
-      const otpInput = document.getElementById("otp-input");
-      const otpEntered = otpInput.value;
-      await firebase.auth().signInWithCredential(verificationId, otpEntered);
-      setUser(firebase.auth().currentUser);
-      signinSuccess();
-      setSignInLoading(false);
-    } catch (error) {
-      setError(error.message + " " + "verification error");
-      setSignInLoading(false);
-    }
-  };
-
-  const signinSuccess = () => {
-    resetStates();
-  };
-
-  const resetStates = () => {
-    setUser(null);
-    setPhoneNumber("");
-    setPhoneNumberError(null);
-    setSignInLoading(false);
-    setVerificationId("");
-    setPhoneNumberBackup("");
-    setCode("");
     setError(null);
-  };
+    if (!otp.trim()) {
+      return setError("Please enter the OTP.");
+    }
 
-  const handleLogout = async () => {
-    resetStates();
+    setLoading(true);
     try {
-      await firebase.auth().signOut();
-    } catch (error) {
-      setError("You are not authenticated.");
+      const credential = PhoneAuthProvider.credential(verificationId, otp);
+      await signInWithCredential(auth, credential);
+      setOtp("");
+    } catch (err) {
+      console.error("OTP verification error:", err);
+
+      // Handle specific Firebase error codes
+      if (err.code === "auth/invalid-verification-code") {
+        setError("Invalid OTP. Please try again.");
+      } else if (err.code === "auth/code-expired") {
+        setError("OTP has expired. Request a new one.");
+      } else if (err.code === "auth/too-many-requests") {
+        setError("Too many attempts. Try again later.");
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
+    } finally {
+      setLoading(false);
     }
   };
+
+  async function handleLogout() {
+    try {
+      await signOut(auth);
+      setUser(null);
+      setOtpSent(false);
+      setPhoneNumber("");
+      setOtp("");
+      setVerificationId(null);
+
+      // 🛠️ FIX: Reset reCAPTCHA on logout to prevent old references
+      if (window.recaptchaVerifier) {
+        window.recaptchaVerifier.clear();
+        window.recaptchaVerifier = null;
+      }
+    } catch (err) {
+      console.error("Logout error:", err);
+      setError("Failed to log out.");
+    }
+  }
 
   return (
     <div className="auth">
       {user ? (
         <div>
-          <h2>Welcome {user.phoneNumber}</h2>
+          <h2>✅ Signed in with {user.phoneNumber}</h2>
           <button onClick={handleLogout}>Logout</button>
         </div>
       ) : (
         <div>
-          <h2>Please Sign In</h2>
-          <form id="phone-sign-in-form" style={{ display: "flex" }}>
-            <input
-              type="tel"
-              value={phoneNumber}
-              onChange={handlePhoneNumberInput}
-              placeholder="Enter your phone number"
-              style={{ width: "100%" }}
-            />
-          </form>
-          <button
-            type="button"
-            onClick={handlePhoneSignIn}
-            disabled={signInLoading}
-            style={{ width: "100%" }}
-          >
-            {signInLoading ? "Signing In..." : "Sign In"}
-          </button>
-          <div
-            id="otp-verify-form"
-            style={{
-              display: signInLoading ? "none" : "flex",
-              alignItems: "center",
-              flexDirection: "column",
-            }}
-          >
-            <input
-              type="number"
-              id="otp-input"
-              value={code}
-              placeholder="Enter OTP"
-              style={{ width: "100%" }}
-              onChange={(e) => setCode(e.target.value)}
-            />
-            <button
-              type="button"
-              onClick={handleVerifyCode}
-              disabled={signInLoading}
-              style={{ width: "100%" }}
-            >
-              {signInLoading ? "Verifying..." : "Verify"}
-            </button>
-            {phoneNumberError && (
-              <p style={{ color: "red" }}>{phoneNumberError}</p>
-            )}
-            {error && <p style={{ color: "red" }}>{error}</p>}
-          </div>
+          <h2>Sign In with Phone</h2>
+
+          {!otpSent ? (
+            <>
+              <input
+                type="tel"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="Enter phone (e.g., 1234512345)"
+                autoFocus={true}
+              />
+              <div id="recaptcha-container"></div>
+              <button onClick={handlePhoneSignIn} disabled={loading}>
+                {loading ? "Sending OTP..." : "Send OTP"}
+              </button>
+            </>
+          ) : (
+            <>
+              <input
+                type="text"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="Enter OTP"
+              />
+              <button onClick={handleVerifyCode} disabled={loading}>
+                {loading ? "Verifying..." : "Verify OTP"}
+              </button>
+            </>
+          )}
+
+          {error && <p style={{ color: "red" }}>{error}</p>}
         </div>
       )}
     </div>
