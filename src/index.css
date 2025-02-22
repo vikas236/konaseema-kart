@@ -6,16 +6,3 @@
 * {
   font-family: "Poppins", serif;
 }
-
-:root {
-  --primary-color: #529075;
-  --secondary-color: #fff;
-}
-
-.swiper-pagination-bullet {
-  background: #83af9b !important;
-}
-
-.swiper-pagination-bullet-active {
-  background: #45876a !important;
-}

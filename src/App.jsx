@@ -3,9 +3,8 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
-  Link,
-  useNavigate,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
 import Home from "./pages/Home.jsx";
 import Restaurants from "./pages/Restaurants.jsx";
@@ -17,14 +16,23 @@ import Nav from "./pages/Nav.jsx";
 import Profile from "./pages/Profile.jsx";
 import Dock from "./pages/Dock.jsx";
 import Auth from "./pages/Auth.jsx";
+import * as helpers from "./core/helpers.js";
 
 function App() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState(() => {
     return localStorage.getItem("kk_cart_items")
       ? JSON.parse(localStorage.getItem("kk_cart_items"))
       : [];
   });
+  const [user, setUser] = useState(null);
+
+  // useEffect(() => {
+  //   if (!user) {
+  //     navigate("/auth");
+  //   }
+  // }, [user]);
 
   return (
     <div className="app w-full overflow-x-hidden overflow-y-scroll py-3">
@@ -52,7 +60,7 @@ function App() {
           path="/admin"
           element={<Admin cartItems={cartItems} setCartItems={setCartItems} />}
         />
-        <Route path="/auth" element={<Auth />} />
+        <Route path="/auth" element={<Auth user={user} setUser={setUser} />} />
       </Routes>
       <Dock cartItems={cartItems} />
     </div>
