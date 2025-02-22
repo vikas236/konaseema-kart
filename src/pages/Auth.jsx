@@ -1,14 +1,4 @@
 import React, { useState, useEffect } from "react";
-import {
-  getAuth,
-  RecaptchaVerifier,
-  signInWithPhoneNumber,
-  onAuthStateChanged,
-  signOut,
-  PhoneAuthProvider,
-  signInWithCredential,
-} from "firebase/auth";
-import { auth } from "../core/firebaseconfig";
 import { useNavigate } from "react-router-dom";
 
 const Auth = () => {
@@ -42,7 +32,6 @@ const Auth = () => {
             />
             <div id="recaptcha-container"></div>
             <button
-              onClick={handlePhoneSignIn}
               disabled={loading}
               className="w-[calc(100dvw-40px)] bg-[#307a59] text-white rounded-xl py-4 text-center fixed bottom-[20px] left-[20px]"
             >
@@ -60,7 +49,6 @@ const Auth = () => {
               className="w-full outline-none border-b-2 border-gray-300 pb-2 mt-4 transition-all text-lg placeholder:text-gray-200"
             />
             <button
-              onClick={handleVerifyCode}
               disabled={loading}
               className="w-[calc(100dvw-40px)] bg-[#307a59] text-white rounded-xl py-4 text-center fixed bottom-[20px] left-[20px]"
             >
