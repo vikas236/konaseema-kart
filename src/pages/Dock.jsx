@@ -7,7 +7,7 @@ const DockLink = ({ icon_type, page_name, path }) => {
       to={path}
       className={({ isActive }) =>
         `dock_link flex flex-col items-center cursor-pointer transition-all 
-         ${isActive ? "text-[#307a59]" : "text-gray-400"}`
+         ${isActive ? "text-primary" : "text-gray-400"}`
       }
     >
       <i className={`bx ${icon_type} text-2xl px-3 pb-[2px]`}></i>
@@ -51,7 +51,7 @@ const Dock = ({ cartItems, redirectCart = "/cart" }) => {
         >
           <NavLink to={redirectCart}>
             <div className="buy_button">
-              <button className="bg-[#307a59] text-white px-4 py-2 text-xl rounded-xl cursor-pointer">
+              <button className="bg-primary text-white px-4 py-2 text-xl rounded-xl cursor-pointer">
                 Place Order
               </button>
             </div>

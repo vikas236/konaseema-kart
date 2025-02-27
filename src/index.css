@@ -6,3 +6,8 @@
 * {
   font-family: "Poppins", serif;
 }
+
+@theme {
+  --color-primary: #307a59;
+  --font-primary: "Poppins", serif;
+}

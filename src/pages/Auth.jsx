@@ -11,39 +11,11 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [otpSent, setOtpSent] = useState(false);
 
-  const sendOtp = async () => {
-    if (!/^\d{10}$/.test(phoneNumber)) {
-      setError("Please enter your phone number");
-      return 0;
-    }
-    setLoading(true);
-
-    try {
-      const response = await fetch();
-      // `${import.meta.env.VITE_FAST2SMS_BASE_URL}?authorization=${
-      //   import.meta.env.VITE_FAST2SMS_AUTHORIZATION
-      // }&route=otp&variables_values=${otp}&flash=0&numbers=${NUMBER}`
-      const data = await response.json();
-      if (data.status === "success") {
-        setOtpSent(true);
-        setVerificationId(data.verification_id);
-      } else {
-        setError(data.message);
-      }
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   function verifyNumber() {
     const input = document.querySelector(".phone_input");
-    const random_number = Math.floor(Math.random() * 9000) + 1000;
     if (/^[0-9]{10}$/.test(input.value)) {
       setLoading(true);
-      setVerificationId(random_number);
-      console.log(random_number);
+      // send mobile number  to node server
       setOtpSent(true);
       setError(null);
       setLoading(false);
@@ -54,9 +26,8 @@ const Auth = () => {
 
   function verifyOtp() {
     setLoading(true);
-    if (verificationId === parseInt(otp)) {
-      console.log("you are logged in succesfully");
-    }
+    // send otp verification request to node server
+    setError(null);
     setLoading(false);
   }
 
@@ -82,7 +53,7 @@ const Auth = () => {
             <div id="recaptcha-container"></div>
             <button
               disabled={loading}
-              className="continue_btn w-[calc(100dvw-40px)] bg-[#307a59] text-white rounded-xl py-4 text-center fixed bottom-[20px] left-[20px]"
+              className="continue_btn w-[calc(100dvw-40px)] bg-primary text-white rounded-xl py-4 text-center fixed bottom-[20px] left-[20px]"
               onClick={verifyNumber}
             >
               {loading ? "Sending OTP..." : "Continue"}
@@ -100,7 +71,7 @@ const Auth = () => {
             />
             <button
               disabled={loading}
-              className="w-[calc(100dvw-40px)] bg-[#307a59] text-white rounded-xl py-4 text-center fixed bottom-[20px] left-[20px]"
+              className="w-[calc(100dvw-40px)] bg-primary text-white rounded-xl py-4 text-center fixed bottom-[20px] left-[20px]"
               onClick={verifyOtp}
             >
               {loading ? "Verifying..." : "Verify OTP"}

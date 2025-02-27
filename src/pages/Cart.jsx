@@ -251,7 +251,7 @@ function Cart({ cartItems, setCartItems }) {
           />
           <button
             onClick={detectLocation}
-            className="mt-2 px-3 py-2 bg-[#307a59] text-white rounded-md hover:bg-[#255c44]"
+            className="mt-2 px-3 py-2 bg-primary text-white rounded-md hover:bg-[#255c44]"
           >
             {loading ? "Detecting..." : "Detect Location"}
           </button>
@@ -259,7 +259,7 @@ function Cart({ cartItems, setCartItems }) {
 
         <button
           onClick={saveDetails}
-          className="mt-2 px-3 py-2 bg-[#307a59] text-white rounded-md hover:bg-[#255c44]"
+          className="mt-2 px-3 py-2 bg-primary text-white rounded-md hover:bg-[#255c44]"
         >
           Save Details
         </button>
@@ -267,7 +267,7 @@ function Cart({ cartItems, setCartItems }) {
         <div className="checkout fixed bottom-0 left-0 w-full bg-white border-t border-gray-400 rounded-t-3xl">
           <button
             onClick={proceedToCheckout}
-            className="mt-3 px-5 py-2 bg-[#307a59] text-white rounded-md absolute bottom-[25px] left-[50%] translate-x-[-50%] w-[calc(100%-40px)]"
+            className="mt-3 px-5 py-2 bg-primary text-white rounded-md absolute bottom-[25px] left-[50%] translate-x-[-50%] w-[calc(100%-40px)]"
           >
             Proceed to Checkout ₹{totalAmount}/-
           </button>

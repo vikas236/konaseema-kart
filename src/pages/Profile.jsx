@@ -35,12 +35,12 @@ function Profile() {
         onChange={handlePhoneChange}
         maxLength="10"
         placeholder="Enter phone number"
-        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#307a59]"
+        className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
       />
 
       <button
         onClick={savePhone}
-        className="mt-4 w-full bg-[#307a59] text-white py-2 rounded-md hover:bg-[#255c44] transition"
+        className="mt-4 w-full bg-primary text-white py-2 rounded-md hover:bg-[#255c44] transition"
       >
         Save
       </button>

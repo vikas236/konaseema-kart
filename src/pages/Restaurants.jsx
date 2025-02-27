@@ -50,7 +50,7 @@ function Restaurants({ cartItems, setCartItems }) {
               />
               <div className="details flex flex-col justify-between gap-2">
                 <h2 className="text-sm truncate">{e}</h2>
-                <button className="text-start flex items-center justify-between text-gray-400 text-md active:text-[#307a59] text-sm">
+                <button className="text-start flex items-center justify-between text-gray-400 text-md active:text-primary text-sm">
                   view menu
                   <i className="bx bx-chevron-right bg-[#accabd] rounded-full p-[1px] text-white ml-2"></i>
                 </button>

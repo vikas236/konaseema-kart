@@ -8,8 +8,8 @@ import banner2 from "../assets/banner2.png";
 function HugeOffer() {
   return (
     <div
-      className="w-full huge_offer py-4 px-6 relative mt-5 bg-[#307a59] text-white rounded-lg 
-  before:w-[calc(100%-20px)] before:h-[50px] before:bg-[#307a59]/20 before:content-[''] before:absolute before:bottom-[-8px] 
+      className="w-full huge_offer py-4 px-6 relative mt-5 bg-primary text-white rounded-lg 
+  before:w-[calc(100%-20px)] before:h-[50px] before:bg-primary/20 before:content-[''] before:absolute before:bottom-[-8px] 
   before:left-[10px] before:rounded-xl before:z-[-1] cursor-pointe"
     >
       <h1 className="text-md font-semibold">
@@ -17,7 +17,7 @@ function HugeOffer() {
         <i className="bx bx-chevron-right absolute right-[13px] text-3xl bg-[#266247] rounded-full"></i>
       </h1>
       <p className="font-light text-md">very good offer!!!</p>
-      <button className="bg-white text-[#307a59] mt-3 px-2 py-1 rounded-md text-sm font-semibold">
+      <button className="bg-white text-primary mt-3 px-2 py-1 rounded-md text-sm font-semibold">
         place order
       </button>
     </div>
