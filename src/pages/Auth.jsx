@@ -19,9 +19,9 @@ const Auth = () => {
     localStorage.getItem("kk_address") || ""
   );
 
-  useEffect(() => {
-    // if (phoneNumber) navigate("/");
-  }, [phoneNumber]);
+  // useEffect(() => {
+  // if (phoneNumber) navigate("/");
+  // }, [phoneNumber]);
 
   async function verifyNumber() {
     if (!loading) {
