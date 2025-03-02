@@ -20,7 +20,7 @@ const Auth = () => {
   );
 
   useEffect(() => {
-    if (phoneNumber) navigate("/");
+    // if (phoneNumber) navigate("/");
   }, [phoneNumber]);
 
   async function verifyNumber() {
