@@ -19,10 +19,6 @@ const Auth = () => {
     localStorage.getItem("kk_address") || ""
   );
 
-  // useEffect(() => {
-  // if (phoneNumber) navigate("/");
-  // }, [phoneNumber]);
-
   async function verifyNumber() {
     if (!loading) {
       const input = document.querySelector(".phone_input");
@@ -212,6 +208,9 @@ const Auth = () => {
                 onClick={verifyOtp}
               >
                 {loading ? "Verifying..." : "Verify OTP"}
+                <span className="inline-block mt-5 text-sm absolute top-[-45px] text-black w-full left-0">
+                  It may take some time to receive the otp
+                </span>
               </button>
             </>
           )}
