@@ -19,7 +19,7 @@ export function popUpMessage(message, type) {
   document.querySelector("body").appendChild(span);
 
   setTimeout(() => {
-    span.className = `fixed bottom-[20px] left-50 translate-x-[-50%] ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 ease-out text-center`;
+    span.className = `fixed bottom-[105px] left-50 translate-x-[-50%] ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 ease-out text-center`;
   }, 250);
 
   setTimeout(() => {
