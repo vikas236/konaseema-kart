@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
 
 const Carousel = ({
@@ -131,17 +131,27 @@ const Carousel = ({
         ))}
       </Slider>
       <div className="dishes">
-        {menu_items[Math.floor(activeIndex)]?.map((e, i) => (
-          <div className="dish w-full" key={i}>
-            <div className="dish_name p-5 bg-gray-100 mb-2 border border-gray-200 rounded-xl">
-              <h2 className="dish_name">{e[0]}</h2>
-              <div className="dish_price text-[#307a59] flex items-center justify-between mt-5">
-                <span>₹{e[1]}/-</span>
-                <CartIcon dish_name={e[0]} dish_price={e[1]} />
+        {menu_items[Math.floor(activeIndex)]?.map((e, i) => {
+          let price = e[1];
+          if (
+            localStorage.getItem("kk_active_restaurant") ===
+              "vindhu family restaruant" &&
+            e[1] >= 100
+          )
+            price = e[1] + 20;
+
+          return (
+            <div className="dish w-full" key={i}>
+              <div className="dish_name p-5 bg-gray-100 mb-2 border border-gray-200 rounded-xl">
+                <h2 className="dish_name">{e[0]}</h2>
+                <div className="dish_price text-[#307a59] flex items-center justify-between mt-5">
+                  <span>₹{price}/-</span>
+                  <CartIcon dish_name={e[0]} dish_price={price} />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
