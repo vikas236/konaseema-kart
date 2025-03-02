@@ -98,7 +98,7 @@ const Carousel = ({
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto mt-1 pt-2 pb-3">
+    <div className="w-full max-w-3xl mx-auto mt-1 pt-2 pb-22">
       <Slider {...settings}>
         {carouselContent.map((item, index) => (
           <div

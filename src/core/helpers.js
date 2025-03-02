@@ -15,11 +15,11 @@ export function popUpMessage(message, type) {
 
   const span = document.createElement("span");
   span.innerHTML = message;
-  span.className = `fixed bottom-[-125px] left-50 translate-x-[-50%] ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 ease-out`;
+  span.className = `fixed bottom-[-125px] left-50 translate-x-[-50%] ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 ease-out text-center`;
   document.querySelector("body").appendChild(span);
 
   setTimeout(() => {
-    span.className = `fixed bottom-[20px] left-50 translate-x-[-50%] ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 ease-out`;
+    span.className = `fixed bottom-[20px] left-50 translate-x-[-50%] ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 ease-out text-center`;
   }, 250);
 
   setTimeout(() => {
@@ -95,13 +95,13 @@ export async function removeDialogBox(question, name) {
     const dialog = Object.assign(document.createElement("div"), {
       className: `fixed top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] 
         rounded-3xl w-[calc(100dvw-50px)] h-fit bg-white flex items-center gap-3 
-        justify-center z-50 shadow-md border border-gray-300 min-h-[200px] p-4
+        justify-center z-50 shadow-md border border-gray-300 min-h-[150px] p-2 
         flex-col`,
     });
 
     // Create content
     dialog.innerHTML = `
-     <div class="w-full flex flex-col justify-center items-center p-2">
+     <div class="w-full flex flex-col justify-center items-center px-2">
       <h1 class="text-lg w-full mt-2 font-normal">${question} : 
       <span class="block text-xl font-bold text-primary">${name}</span>
       </h1>

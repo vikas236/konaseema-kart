@@ -18,7 +18,7 @@ const DockLink = ({ icon_type, page_name, path }) => {
 
 const Dock = ({ cartItems, redirectCart = "/cart" }) => {
   const location = useLocation();
-  const disallowed_pathnames = ["/cart", "/admin", "/auth"];
+  const disallowed_pathnames = ["/cart", "/admin", "/auth", "/payment"];
 
   const links = [
     { icon_type: "bxs-home", page_name: "Home", path: "/" },
@@ -28,9 +28,9 @@ const Dock = ({ cartItems, redirectCart = "/cart" }) => {
       path: "/restaurants",
     },
     {
-      icon_type: "bx-search-alt",
-      page_name: "Search",
-      path: "/search",
+      icon_type: "bx-package",
+      page_name: "Orders",
+      path: "/orders",
     },
     {
       icon_type: "bxs-user",
@@ -52,7 +52,7 @@ const Dock = ({ cartItems, redirectCart = "/cart" }) => {
           <NavLink to={redirectCart}>
             <div className="buy_button">
               <button className="bg-primary text-white px-4 py-2 text-xl rounded-xl cursor-pointer">
-                Place Order
+                Go to cart
               </button>
             </div>
           </NavLink>

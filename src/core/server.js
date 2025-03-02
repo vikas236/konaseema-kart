@@ -1,6 +1,6 @@
 const dev_url = "http://localhost:3000";
-const prod_url = "";
-const server_url = dev_url;
+const prod_url = "https://kk-server.vercel.app";
+const server_url = prod_url;
 
 function SearchForTerm(search_term) {
   return 0;
@@ -134,6 +134,40 @@ async function getDishes(restaurant_name, category_name) {
     });
 }
 
+async function sendOtp(phoneNumber) {
+  return await fetch(server_url + "/send-otp", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ phoneNumber }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
+async function verifyOtp(phoneNumber, otp) {
+  return await fetch(server_url + "/verify-otp", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ phoneNumber: phoneNumber, otp: otp }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
 export default {
   SearchForTerm,
   greet,
@@ -144,4 +178,6 @@ export default {
   addNewCategory,
   removeCategory,
   getDishes,
+  sendOtp,
+  verifyOtp,
 };

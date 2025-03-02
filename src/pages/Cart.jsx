@@ -1,278 +1,176 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import helpers from "../core/helpers.js";
 
 function Cart({ cartItems, setCartItems }) {
-  const [phone, setPhone] = useState("");
-  const [location, setLocation] = useState("");
+  const [phone, setPhone] = useState(localStorage.getItem("kk_phone"));
+  const [address, setAdress] = useState(localStorage.getItem("kk_address"));
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    setPhone(localStorage.getItem("kk_user_phone") || "");
-    setLocation(localStorage.getItem("kk_user_location") || "");
-  }, []);
-
-  function handlePhoneChange(e) {
-    const value = e.target.value.replace(/\D/g, ""); // Allow only numbers
-    setPhone(value);
+  function handlePrice(index, quantity) {
+    const newCartItems = [...cartItems];
+    newCartItems[index].quantity = quantity;
+    setCartItems(newCartItems);
+    localStorage.setItem("kk_cart_items", JSON.stringify(newCartItems));
+    if (quantity === 0) handleDelete(index);
   }
 
-  function saveDetails() {
-    if (phone.length < 10) {
-      alert("Enter a valid phone number.");
-      return;
-    }
-    if (!location) {
-      alert("Enable location to proceed.");
-      return;
-    }
-    localStorage.setItem("kk_user_phone", phone);
-    localStorage.setItem("kk_user_location", location);
-    alert("Details saved!");
-  }
-
-  function increaseQuantity(name) {
-    const updatedCart = cartItems.map((item) =>
-      item.name === name ? { ...item, quantity: item.quantity + 1 } : item
-    );
-    setCartItems(updatedCart);
-    localStorage.setItem("kk_cart_items", JSON.stringify(updatedCart));
-  }
-
-  function decreaseQuantity(name) {
-    const updatedCart = cartItems
-      .map((item) =>
-        item.name === name ? { ...item, quantity: item.quantity - 1 } : item
-      )
-      .filter((item) => item.quantity > 0);
-
-    setCartItems(updatedCart);
-    localStorage.setItem("kk_cart_items", JSON.stringify(updatedCart));
-  }
-
-  function removeItem(name) {
-    const updatedCart = cartItems.filter((item) => item.name !== name);
-    setCartItems(updatedCart);
-    localStorage.setItem("kk_cart_items", JSON.stringify(updatedCart));
-  }
-
-  const totalAmount = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
-
-  // Proceed to checkout function
-  function proceedToCheckout(e) {
-    const [lat_number, long_number] = JSON.parse(
-      localStorage.getItem("kk_user_location_coordinates")
+  async function handleDelete(index) {
+    const response = await helpers.removeDialogBox(
+      "Remove from cart",
+      cartItems[index].name
     );
 
+    if (response == "removed") {
+      const newCartItems = [...cartItems];
+      newCartItems.splice(index, 1);
+      setCartItems(newCartItems);
+      localStorage.setItem("kk_cart_items", JSON.stringify(newCartItems));
+      helpers.popUpMessage("removed", "success");
+    } else {
+      helpers.popUpMessage("cancelled", "error");
+      handlePrice(index, 1);
+    }
+  }
+
+  async function handleOrder() {
+    if (phone) {
+      if (!loading) {
+        setLoading(true);
+        const response = await helpers.removeDialogBox("Place order", "");
+        if (response == "removed") {
+          proceedToCheckout();
+        } else helpers.popUpMessage("cancelled", "error");
+        setLoading(false);
+      }
+    } else navigate("/auth");
+  }
+
+  function proceedToCheckout() {
     let food_order_items = cartItems
       .map(
         (e) => "\n" + JSON.stringify(`${e.name}: ₹${e.price}/-(${e.quantity})`)
       )
       .join("");
 
-    if (cartItems.length > 0) {
-      e.currentTarget.classList.add("hidden");
-      setTimeout(() => {
-        if (e.target) e.target.classList.remove("hidden");
-      }, 1500);
-
-      if (!phone || phone.length < 10) {
-        alert("Enter a valid phone number before proceeding.");
-        return;
-      }
-      if (!location) {
-        alert("Enable location before proceeding.");
-        return;
-      }
-      const botToken = import.meta.env.VITE_TELEGRAM_BOT_API;
-      const chatId = import.meta.env.VITE_TELEGRAM_CHATID;
-      const restaurantName =
-        localStorage.getItem("kk_active_restaurant") || "Unknown Restaurant";
-      const longitude = localStorage
-        .getItem("kk_user_location")
-        ?.split(", ")[1]
-        .trim();
-      const latitude = localStorage
-        .getItem("kk_user_location")
-        ?.split(", ")[0]
-        .trim();
-      if (!botToken || !chatId) {
-        alert("Missing Telegram API credentials. Check your .env file.");
-        return;
-      }
-      const orderDetails = cartItems
-        .map(
-          (item) =>
-            `${item.name} (x${item.quantity}) - ₹${item.price * item.quantity}`
-        )
-        .join("\n");
-      const message =
-        `📦 *New Order Received!* 📦\n\n` +
-        `🏠 *Restaurant:* ${restaurantName}\n` +
-        `🍔 *Food:* ${food_order_items}` +
-        `📞 *Phone:* ${phone}\n` +
-        `📍 *Address:* ${location}\n` +
-        `📍 *Find on Google Maps:* https://www.google.com/maps?q=${lat_number},${long_number}` +
-        `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
-      const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
-        message
-      )}&parse_mode=Markdown`;
-
-      fetch(telegramUrl)
-        .then((response) => response.json())
-        .then((data) => {
-          if (data.ok) {
-            alert("Order placed successfully! 📦");
-            // Clear the cart
-            setCartItems([]);
-            localStorage.removeItem("kk_cart_items");
-            navigate("/restaurants");
-          } else {
-            alert("Failed to send order details. Please try again.");
-          }
-        })
-        .catch((error) => {
-          console.error("Error sending message:", error);
-          alert("An error occurred while placing the order.");
-        });
-    }
-  }
-
-  function detectLocation() {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
+    const botToken = import.meta.env.VITE_TELEGRAM_BOT_API;
+    const chatId = import.meta.env.VITE_TELEGRAM_CHATID;
+    const restaurantName = localStorage.getItem("kk_active_restaurant");
+    const location = localStorage.getItem("kk_address");
+    const location_url = localStorage.getItem("kk_location_url");
+    const phone = localStorage.getItem("kk_phone");
+    console.log(botToken, chatId);
+    if (!botToken || !chatId) {
+      // alert("Missing Telegram API credentials. Check your .env file.");
       return;
     }
-
-    setLoading(true);
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        setLocation(`Lat: ${latitude}, Lng: ${longitude}`);
-        localStorage.setItem(
-          "kk_user_location",
-          `Lat: ${latitude}, Lng: ${longitude}`
-        );
-        localStorage.setItem(
-          "kk_user_location_coordinates",
-          JSON.stringify([latitude, longitude])
-        );
-
-        // Reverse geocoding
-        try {
-          const response = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-          );
-          const data = await response.json();
-          if (data.display_name) {
-            setLocation(data.display_name);
-            localStorage.setItem("kk_user_location", data.display_name);
-          }
-        } catch (error) {
-          console.error("Reverse geocoding failed", error);
-        }
-
-        setLoading(false);
-      },
-      () => {
-        alert("Failed to retrieve location.");
-        setLoading(false);
-      }
+    const totalAmount = cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
     );
+    const message =
+      `📦 *New Order Received!* 📦\n\n` +
+      `🏠 *Restaurant:* ${restaurantName}\n` +
+      `🍔 *Food:* ${food_order_items}` +
+      `📞 *Phone:* ${phone}\n` +
+      `📍 *Address:* ${location}\n` +
+      `📍 *Find on Google Maps:*  ${location_url}\n` +
+      `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
+    const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
+      message
+    )}&parse_mode=Markdown`;
+
+    fetch(telegramUrl)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.ok) {
+          // Clear the cart
+          setCartItems([]);
+          localStorage.removeItem("kk_cart_items");
+          helpers.popUpMessage("order placed", "success");
+          setTimeout(async () => {
+            await helpers.removeDialogBox(
+              "please wait for order confirmation",
+              "our representative will call you soon"
+            );
+          }, 500);
+          navigate("/restaurants");
+        } else {
+          alert("Failed to send order details. Please try again.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error sending message:", error);
+        alert("An error occurred while placing the order.");
+      });
   }
 
   return (
-    <div className="cart-container max-w-3xl mx-auto pb-5 bg-white rounded-lg">
-      <h1 className="text-md font-semibold mb-5 text-center">Your Cart</h1>
-
-      {cartItems.length === 0 ? (
-        <p className="text-center text-gray-500">Your cart is empty.</p>
-      ) : (
-        <div className="cart-items flex flex-col gap-5">
-          {cartItems.map((item, index) => (
-            <div
-              key={index}
-              className="cart-item flex justify-between items-center p-4 border rounded-lg bg-gray-50"
-            >
-              <div>
-                <h2 className="text-lg font-medium">{item.name}</h2>
-                <p className="text-gray-500">₹{item.price}/-</p>
-              </div>
-              <div className="flex items-center gap-2">
+    <div className="cart pb-6">
+      {cartItems.length > 0 && <h1 className="mb-12 text-center mt-5">Cart</h1>}
+      {cartItems.length > 0 ? (
+        cartItems.map((item, index) => (
+          <div
+            className="cart-item flex justify-between items-end shadow-sm border border-gray-200 p-4 rounded-2xl relative mb-2"
+            key={index}
+          >
+            <div className="left">
+              <h2 className="font-semibold">{item.name}</h2>
+              <h2 className="text-primary pt-2">
+                ₹{item.price}({item.quantity}) = ₹{item.price * item.quantity}
+                /-
+              </h2>
+            </div>
+            <div className="right w-[100px] flex justify-end">
+              <div className="bg-primary w-fit text-white rounded-full px-1 py-1">
                 <button
-                  className="bg-red-500 px-3 rounded-md text-white text-md pb-1 ml-2"
-                  onClick={() => removeItem(item.name)}
-                >
-                  x
-                </button>
-                <button
-                  className="bg-gray-200 px-2 rounded-md text-lg active:bg-transparent"
-                  onClick={() => decreaseQuantity(item.name)}
+                  className="rounded-full px-2 transition-all active:bg-gray-100/25"
+                  onClick={() => handlePrice(index, item.quantity - 1)}
                 >
                   -
                 </button>
-                <span className="w-8 text-center">{item.quantity}</span>
+                <span className="px-2">{item.quantity}</span>
                 <button
-                  className="bg-green-500 px-2 rounded-md text-lg text-white active:bg-transparent"
-                  onClick={() => increaseQuantity(item.name)}
+                  className="rounded-full px-2 transition-all active:bg-gray-100/25"
+                  onClick={() => handlePrice(index, item.quantity + 1)}
                 >
                   +
                 </button>
               </div>
             </div>
-          ))}
-        </div>
+            <button
+              className="absolute top-[5px] right-[5px] text-gray-400 text-2xl transition-all active:bg-gray-200/50 px-2 rounded-full"
+              onClick={() => handleDelete(index)}
+            >
+              -
+            </button>
+          </div>
+        ))
+      ) : (
+        <h2 className="w-full h-[calc(100dvh-20px)] text-2xl flex justify-center items-center text-gray-400 font-semibold">
+          No items in cart
+        </h2>
       )}
 
-      <div className="mt-5 mb-6">
-        <div className="mb-4">
-          <label className="block text-gray-600 mb-2">Phone Number:</label>
-          <input
-            type="tel"
-            value={phone}
-            onChange={handlePhoneChange}
-            maxLength="10"
-            placeholder="Enter phone number"
-            className="w-full px-3 py-2 border rounded-md bg-gray-100/80"
-          />
-        </div>
-
-        <div className="mb-4">
-          <label className="block text-gray-600 mb-2">Location:</label>
-          <input
-            type="text"
-            value={location}
-            readOnly
-            placeholder="Click 'Detect Location'"
-            className="w-full px-3 py-2 border rounded-md bg-gray-100/80"
-          />
-          <button
-            onClick={detectLocation}
-            className="mt-2 px-3 py-2 bg-primary text-white rounded-md hover:bg-[#255c44]"
-          >
-            {loading ? "Detecting..." : "Detect Location"}
-          </button>
-        </div>
-
+      {cartItems.length > 0 && (
         <button
-          onClick={saveDetails}
-          className="mt-2 px-3 py-2 bg-primary text-white rounded-md hover:bg-[#255c44]"
+          className="w-[calc(100%-40px)] bg-primary text-white rounded-lg fixed bottom-[20px] py-3 text-center"
+          onClick={handleOrder}
         >
-          Save Details
+          {loading
+            ? "Loading..."
+            : `Place Order ₹
+          ${cartItems.reduce(
+            (total, item) => total + item.price * item.quantity,
+            0
+          )}
+          /-`}
+          <span className="absolute top-[-20px] left-0 text-primary text-xs font-semibold">
+            only cash on delivery
+          </span>
         </button>
-
-        <div className="checkout fixed bottom-0 left-0 w-full bg-white border-t border-gray-400 rounded-t-3xl">
-          <button
-            onClick={proceedToCheckout}
-            className="mt-3 px-5 py-2 bg-primary text-white rounded-md absolute bottom-[25px] left-[50%] translate-x-[-50%] w-[calc(100%-40px)]"
-          >
-            Proceed to Checkout ₹{totalAmount}/-
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

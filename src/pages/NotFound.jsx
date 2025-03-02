@@ -147,7 +147,7 @@ function NotFound() {
         </p>
         <Link
           to="/"
-          className="mt-4 inline-block px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+          className="mt-4 inline-block px-4 py-2 bg-primary text-white rounded"
         >
           Go to Home
         </Link>

@@ -14,9 +14,11 @@ import Admin from "./pages/Admin.jsx";
 import Menu from "./pages/Menu.jsx";
 import Nav from "./pages/Nav.jsx";
 import Profile from "./pages/Profile.jsx";
+import Orders from "./pages/Orders.jsx";
 import Dock from "./pages/Dock.jsx";
 import Auth from "./pages/Auth.jsx";
 import NotFound from "./pages/NotFound.jsx";
+import Payment from "./pages/Payment.jsx";
 
 function App() {
   const location = useLocation();
@@ -58,6 +60,7 @@ function App() {
         />
         <Route path="/search" element={<Search />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/orders" element={<Orders />} />
         <Route
           path="/cart"
           element={<Cart cartItems={cartItems} setCartItems={setCartItems} />}
@@ -66,8 +69,9 @@ function App() {
           path="/admin"
           element={<Admin cartItems={cartItems} setCartItems={setCartItems} />}
         />
-        <Route path="/auth" element={<Auth />} />{" "}
+        <Route path="/auth" element={<Auth />} />
         <Route path="*" element={<NotFound />} />
+        {/* <Route path="/payment" element={<Payment />} /> */}
       </Routes>
       <Dock cartItems={cartItems} />
     </div>

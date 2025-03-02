@@ -2,7 +2,7 @@ import { useLocation } from "react-router-dom";
 import { NavLink } from "react-router-dom";
 
 function Nav({ cartItems, setCartItems }) {
-  const disallowed_pathnames = ["/cart", "/admin"];
+  const disallowed_pathnames = ["/cart", "/admin", "/payment"];
   const location = useLocation();
 
   const CartIcon = () => {
