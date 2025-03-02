@@ -132,7 +132,9 @@ function Profile() {
               className="w-22 h-16 rounded-md border border-gray-300"
             /> */}
             <div className="content flex flex-col w-full">
-              <h3 className="text-sm font-semibold">Your Name</h3>
+              <h3 className="text-sm font-semibold">
+                {name ? name : "Your Name"}
+              </h3>
               <span className="email text-xs text-gray-400 pt-1">
                 {phone ? phone : "Your Phone"}
               </span>
