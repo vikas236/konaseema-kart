@@ -386,7 +386,7 @@ export const recipes = {
       ["Veg Sp Mogalai Biryani (Mushroom)", 300],
     ],
     nonveg_biryani: [
-      ["Chicken Fry Bit Biryani", 240],
+      ["Chicken Fry Piece Biryani", 240],
       ["Pot Biryani", 300],
       ["Chicken Sp Biryani", 280],
       ["Prawns Sp Biryani", 340],
