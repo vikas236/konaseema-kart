@@ -9,12 +9,10 @@ const Auth = () => {
     localStorage.getItem("kk_phone") || ""
   );
   const [otp, setOtp] = useState("");
-  const [verificationId, setVerificationId] = useState(null);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [otpSent, setOtpSent] = useState(false);
-  const [userInfoEdit, setUserInfoEdit] = useState(false);
-  const [name, setName] = useState(localStorage.getItem("kk_name") || "");
+  const [otpSent, setOtpSent] = useState(true);
+  const [userInfoEdit, setUserInfoEdit] = useState(true);
   const [address, setAddress] = useState(
     localStorage.getItem("kk_address") || ""
   );
@@ -94,22 +92,16 @@ const Auth = () => {
       if (!loading) {
         setLoading(true);
 
-        if (name.length > 2) localStorage.setItem("kk_name", name);
-        else setError("name should be at least 3 characters long");
-        if (address.length > 5) localStorage.setItem("kk_address", address);
-        else setError("address is too small");
-
-        if (name.length > 2 && address.length > 5) {
+        if (/^\d{10}$/.test(phoneNumber))
           localStorage.setItem("kk_phone", phoneNumber);
-          setTimeout(() => {
-            popUpMessage("login successfull", "success");
-          }, 500);
+        else setError("phone number is invalid");
+        if (!address.length > 5) setError("address should not be empty");
+
+        if (/^\d{10}$/.test(phoneNumber) && address.length > 5) {
           setTimeout(() => {
             setLoading(false);
             navigate("/cart");
-          }, 750);
-        } else {
-          setLoading(false);
+          }, 500);
         }
       }
     }
@@ -118,16 +110,17 @@ const Auth = () => {
       <div className="pb-7">
         <div className="mb-4">
           <label className="block  text-lg mb-2" htmlFor="name">
-            Name
+            Phone
           </label>
           <input
             type="text"
             id="name"
             className="block w-full outline-none border-b-2 border-gray-300 pb-2 mt-2 transition-all text-lg placeholder:text-gray-200"
-            placeholder="your name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
+            placeholder="your phone number"
+            value={phoneNumber}
+            onChange={(e) => setPhoneNumber(e.target.value)}
             autoFocus={true}
+            maxLength={10}
           />
         </div>
         <div className="mb-4">

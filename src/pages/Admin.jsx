@@ -364,22 +364,79 @@ function Admin() {
           }
         }
         getData();
-      }, [selectedRestaurant, selectedCategory]); // Re-run when these change
+      }, [selectedRestaurant, selectedCategory]);
+
+      async function handleImageUpload(dish_name) {
+        const file = await helpers.addImageDialogBox("Add Dish Image");
+        if (file.length > 1) {
+          helpers.popUpMessage("Data Updated", "success");
+          console.log(file[1]);
+          const base64 = await helpers.fileToBase64(file[1]);
+          const response = await server.addDishImage(
+            selectedRestaurant,
+            selectedCategory,
+            dish_name,
+            base64
+          );
+          console.log(response);
+        } else {
+          helpers.popUpMessage("Cancelled", "error");
+        }
+      }
+
+      async function handleImageRemove(dish_name) {
+        console.log(dish_name);
+      }
 
       return (
-        <div className="dishes">
-          {dishes.map((dish, index) => (
-            <div
-              key={index}
-              className="dish px-4 flex justify-between gap-5 flex-col pt-5"
-            >
-              <img src="" alt="" className="w-full h-fit min-h-[250px]" />
-              <div className="w-full">
-                <h2>{dish.dish_name}</h2>
-                <span>{dish.price}</span>
+        <div className="dishes pb-10 px-4 flex flex-col gap-3 mt-3">
+          {dishes.map((dish, index) => {
+            return (
+              <div
+                key={index}
+                className={`dish flex justify-between gap-5 shadow p-2 py-3 rounded-2xl 
+                  border border-gray-300`}
+              >
+                {dish.image ? (
+                  <div className="relative">
+                    <img
+                      src={dish.image}
+                      alt=""
+                      className="w-32 h-fit rounded-md"
+                    />
+                    <i
+                      className={`bx bx-minus absolute top-[-10px] right-[-10px] bg-red-400 
+                        text-2xl text-white rounded-full`}
+                      onClick={() => handleImageRemove(dish.dish_name)}
+                    ></i>
+                    <i
+                      className={`bx bx-edit-alt bg-white absolute rounded-full bottom-[-10px] 
+                        right-[-10px] text-xl p-1 shadow-xl text-primary border border-gray-400`}
+                      onClick={(e) => handleImageUpload(e, dish.dish_name)}
+                    ></i>
+                  </div>
+                ) : (
+                  <button
+                    className="rounded-md w-32 border border-gray-300 relative"
+                    onClick={(e) => handleImageUpload(e, dish.dish_name)}
+                  >
+                    <i className="bx bx-bowl-hot text-3xl text-gray-300"></i>
+                    <i
+                      className={`bx bxs-plus-circle text-2xl text-gray-300 absolute 
+                        bottom-[-10px] right-[-10px] opacity-75 bg-white rounded-full`}
+                    ></i>
+                  </button>
+                )}
+
+                <div className="w-full">
+                  <h2 className="font-semibold">{dish.dish_name}</h2>
+                  <span className="text-primary inline-block mt-1">
+                    ₹{dish.price}/-
+                  </span>
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       );
     }

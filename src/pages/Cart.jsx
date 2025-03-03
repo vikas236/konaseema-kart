@@ -3,8 +3,8 @@ import { Link, useNavigate } from "react-router-dom";
 import helpers from "../core/helpers.js";
 
 function Cart({ cartItems, setCartItems }) {
-  const [phone, setPhone] = useState(localStorage.getItem("kk_phone"));
-  const [address, setAdress] = useState(localStorage.getItem("kk_address"));
+  const phone = useState(localStorage.getItem("kk_phone"));
+  const address = useState(localStorage.getItem("kk_address"));
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -35,7 +35,7 @@ function Cart({ cartItems, setCartItems }) {
   }
 
   async function handleOrder() {
-    if (phone) {
+    if (phone && address) {
       if (!loading) {
         setLoading(true);
         const response = await helpers.removeDialogBox("Place order", "");
@@ -60,7 +60,6 @@ function Cart({ cartItems, setCartItems }) {
     const location = localStorage.getItem("kk_address");
     const location_url = localStorage.getItem("kk_location_url");
     const phone = localStorage.getItem("kk_phone");
-    console.log(botToken, chatId);
     if (!botToken || !chatId) {
       // alert("Missing Telegram API credentials. Check your .env file.");
       return;
@@ -159,7 +158,7 @@ function Cart({ cartItems, setCartItems }) {
           onClick={handleOrder}
         >
           {loading
-            ? "Loading..."
+            ? `Loading...`
             : `Place Order ₹
           ${cartItems.reduce(
             (total, item) => total + item.price * item.quantity,
