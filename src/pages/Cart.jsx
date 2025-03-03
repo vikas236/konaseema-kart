@@ -35,7 +35,7 @@ function Cart({ cartItems, setCartItems }) {
   }
 
   async function handleOrder() {
-    if (phone && address) {
+    if (phone[0] && address[0]) {
       if (!loading) {
         setLoading(true);
         const response = await helpers.removeDialogBox("Place order", "");
