@@ -646,7 +646,7 @@ export const recipes = {
       ["egg puff (full)", 20],
       ["veg curry puff (half)", 15],
       ["veg curry puff (full)", 15],
-      ["chiili puff", 30],
+      ["chicken puff", 30],
     ],
     rolls: [
       ["vanilla cake roll", 15],

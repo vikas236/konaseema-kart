@@ -6,6 +6,7 @@ function Cart({ cartItems, setCartItems }) {
   const phone = useState(localStorage.getItem("kk_phone"));
   const address = useState(localStorage.getItem("kk_address"));
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
 
   function handlePrice(index, quantity) {
@@ -35,16 +36,25 @@ function Cart({ cartItems, setCartItems }) {
   }
 
   async function handleOrder() {
-    if (phone[0] && address[0]) {
-      if (!loading) {
-        setLoading(true);
-        const response = await helpers.removeDialogBox("Place order", "");
-        if (response == "removed") {
-          proceedToCheckout();
-        } else helpers.popUpMessage("cancelled", "error");
-        setLoading(false);
-      }
-    } else navigate("/auth");
+    const totalAmount = cartItems.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0
+    );
+
+    if (totalAmount >= 100) {
+      if (phone[0] && address[0]) {
+        if (!loading) {
+          setLoading(true);
+          const response = await helpers.removeDialogBox("Place order", "");
+          if (response == "removed") {
+            proceedToCheckout();
+          } else helpers.popUpMessage("cancelled", "error");
+          setLoading(false);
+        }
+      } else navigate("/auth");
+    } else {
+      setError("order should be above 100 rupees");
+    }
   }
 
   function proceedToCheckout() {
@@ -165,7 +175,12 @@ function Cart({ cartItems, setCartItems }) {
             0
           )}
           /-`}
-          <span className="absolute top-[-20px] left-0 text-primary text-xs font-semibold">
+          {error && (
+            <span className="text-red-500 absolute top-[-20px] left-0 text-xs font-semibold">
+              {error}
+            </span>
+          )}
+          <span className="absolute bottom-[-15px] right-0 text-primary text-xs font-semibold">
             only cash on delivery
           </span>
         </button>

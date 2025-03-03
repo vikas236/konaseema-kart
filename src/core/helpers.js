@@ -185,10 +185,9 @@ export async function addImageDialogBox(question) {
 const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
-    console.log(file);
-    reader.readAsDataURL(file); // Read file as Data URL (Base64)
-    reader.onload = () => resolve(reader.result); // Resolve with Base64 string
-    reader.onerror = (error) => reject(error); // Handle errors
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
   });
 };
 

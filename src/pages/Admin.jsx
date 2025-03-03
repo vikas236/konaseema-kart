@@ -370,8 +370,8 @@ function Admin() {
         const file = await helpers.addImageDialogBox("Add Dish Image");
         if (file.length > 1) {
           helpers.popUpMessage("Data Updated", "success");
-          console.log(file[1]);
           const base64 = await helpers.fileToBase64(file[1]);
+          // console.log(base64);
           const response = await server.addDishImage(
             selectedRestaurant,
             selectedCategory,
