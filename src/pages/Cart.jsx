@@ -54,6 +54,7 @@ function Cart({ cartItems, setCartItems }) {
       } else navigate("/auth");
     } else {
       setError("order should be above 100 rupees");
+      helpers.popUpMessage("order should be above 100 rupees", "error");
     }
   }
 

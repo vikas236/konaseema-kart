@@ -10,6 +10,25 @@ function greet() {
   console.log("hi");
 }
 
+async function getTableContent(table_name) {
+  return await fetch(server_url + "/get_table", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      table_name: table_name,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
 async function getRestaurantNames() {
   return await fetch(server_url + "/restaurants", { method: "GET" }).then(
     (response) => response.json()
@@ -170,34 +189,87 @@ async function verifyOtp(phoneNumber, otp) {
 
 async function addDishImage(restaurant_name, category_name, dish_name, base64) {
   try {
-    const formData = new FormData();
-    formData.append("restaurant_name", JSON.stringify(restaurant_name));
-    formData.append("category_name", JSON.stringify(category_name));
-    formData.append("dish_name", JSON.stringify(dish_name));
-    formData.append("image", base64);
-
-    console.log(formData);
-
-    const response = await fetch(server_url + "/echo", {
+    const response = await fetch(server_url + "/add_dishimage", {
       method: "POST",
-      body: formData,
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        restaurant_name: restaurant_name,
+        category_name: category_name,
+        dish_name: dish_name,
+        base64: base64,
+      }),
     });
-
     if (!response.ok) {
       throw new Error(`HTTP error! addDishImage: ${response.status}`);
     }
-
     const data = await response.json();
     return data;
   } catch (error) {
     console.error("Error adding dish image:", error);
-    return { success: false, message: error.message };
+    return null;
+  }
+}
+
+async function removeDishImage(restaurant_name, category_name, dish_name) {
+  try {
+    const response = await fetch(server_url + "/remove_dishimage", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        restaurant_name: restaurant_name,
+        category_name: category_name,
+        dish_name: dish_name,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! addDishImage: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error adding dish image:", error);
+    return null;
+  }
+}
+
+async function updateDishPrice(
+  restaurant_name,
+  category_name,
+  dish_name,
+  new_price
+) {
+  try {
+    const response = await fetch(server_url + "/update_dishprice", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        restaurant_name: restaurant_name,
+        category_name: category_name,
+        dish_name: dish_name,
+        new_price: new_price,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! addDishImage: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error adding dish image:", error);
+    return null;
   }
 }
 
 export default {
   SearchForTerm,
   greet,
+  getTableContent,
   getRestaurantNames,
   getCategoryNames,
   addNewRestaurant,
@@ -208,4 +280,6 @@ export default {
   sendOtp,
   verifyOtp,
   addDishImage,
+  removeDishImage,
+  updateDishPrice,
 };

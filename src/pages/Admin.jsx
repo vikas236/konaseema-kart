@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import server from "../core/server";
-import helpers from "../core/helpers";
-import { data } from "react-router-dom";
+import helpers from "../core/helpers.js";
 
 const months = [
   "january",
@@ -17,6 +16,31 @@ const months = [
   "november",
   "december",
 ];
+
+function Spinner({ primary_color }) {
+  let bg_color, text_color;
+  if (primary_color == "white") {
+    bg_color = "bg-white";
+    text_color = "bg-primary";
+  } else {
+    text_color = "bg-white";
+    bg_color = "bg-primary";
+  }
+
+  return (
+    <div className="w-full h-full relative overflow-hidden rounded-full animate-spin">
+      <span
+        className={`w-[60%] h-full absolute top-1/2 left-1/2 ${bg_color} z-10`}
+      ></span>
+      <span
+        className={`w-full h-full absolute left-0 rounded-full opacity-25 ${bg_color} z-10`}
+      ></span>
+      <span
+        className={`w-[75%] h-[75%] absolute top-1/2 left-1/2 -translate-1/2 ${text_color} rounded-full z-30`}
+      ></span>
+    </div>
+  );
+}
 
 function Admin() {
   const now = new Date();
@@ -188,6 +212,7 @@ function Admin() {
       restaurants[0]?.name
     );
     const [selectedCategory, setSelectedCategory] = useState("");
+    const [categoryLoading, setCategoryLoading] = useState(false);
 
     useEffect(() => {
       updateRestaurants();
@@ -204,6 +229,7 @@ function Admin() {
       const data = await server.getCategoryNames(restaurant);
       setCategories(data);
       setSelectedCategory(data[0]?.name);
+      setCategoryLoading(false);
     }
 
     // restaurant and category selection component
@@ -227,125 +253,154 @@ function Admin() {
         );
       }
 
-      function handleRestaurantChange(e) {
-        updateCategories(e.target.value);
-        setSelectedRestaurant(e.target.value);
-      }
+      function Restaurants() {
+        async function removeRestaurant() {
+          const result = await helpers.removeDialogBox(
+            "Restaurant Name",
+            selectedRestaurant
+          );
 
-      function handleCategoryChange(e) {
-        setSelectedCategory(e.target.value);
-      }
-
-      async function removeRestaurant() {
-        const result = await helpers.removeDialogBox(
-          "Restaurant Name",
-          selectedRestaurant
-        );
-
-        if (result === "removed")
-          await server.removeRestaurant(selectedRestaurant).then((response) => {
-            updateRestaurants();
-            helpers.popUpMessage(
-              result,
-              result === "cancelled" ? "error" : "success"
-            );
-          });
-      }
-
-      async function addRestaurant() {
-        const [params, result] = await helpers.addDialogBox("Restaurant Name");
-
-        if (result) {
-          await server.addNewRestaurant(result).then((response) => {
-            updateRestaurants();
-            helpers.popUpMessage(params[0], params[1]);
-          });
+          if (result === "removed")
+            await server
+              .removeRestaurant(selectedRestaurant)
+              .then((response) => {
+                updateRestaurants();
+                helpers.popUpMessage(
+                  result,
+                  result === "cancelled" ? "error" : "success"
+                );
+              });
         }
-      }
 
-      async function removeCategory() {
-        const result = await helpers.removeDialogBox(
-          "Remove Category",
-          selectedCategory
-        );
+        async function addRestaurant() {
+          const [params, result] = await helpers.addDialogBox(
+            "Restaurant Name"
+          );
 
-        if (result === "removed") {
-          await server
-            .removeCategory(selectedCategory, selectedRestaurant)
-            .then((response) => {
-              updateCategories(selectedRestaurant);
-              helpers.popUpMessage(
-                result,
-                result === "cancelled" ? "error" : "success"
-              );
-            });
-        }
-      }
-
-      async function addCategory() {
-        const [params, result] = await helpers.addDialogBox("Category Name");
-
-        if (result) {
-          await server
-            .addNewCategory(result, selectedRestaurant)
-            .then((response) => {
-              updateCategories(selectedRestaurant);
+          if (result) {
+            await server.addNewRestaurant(result).then((response) => {
+              updateRestaurants();
               helpers.popUpMessage(params[0], params[1]);
-              console.log(response);
             });
+          }
         }
+
+        function handleRestaurantChange(e) {
+          setCategoryLoading(true);
+          updateCategories(e.target.value);
+          setSelectedRestaurant(e.target.value);
+        }
+
+        return restaurants.length ? (
+          <div className="">
+            <div className="modify_restaurant absolute bottom-[15px] text-primary text-2xl flex justify-between w-[150px]">
+              <ModifyButtons
+                addFunction={addRestaurant}
+                removeFunction={removeRestaurant}
+              />
+            </div>
+            <select
+              name="restaurant_name"
+              className="restaurant_name_selector text-white w-[150px]"
+              defaultValue={selectedRestaurant}
+              onChange={handleRestaurantChange}
+            >
+              {restaurants.map((restaurant) => {
+                return (
+                  <option
+                    key={restaurant.id}
+                    value={restaurant.name}
+                    className="text-black"
+                  >
+                    {restaurant.name}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        ) : (
+          <div className="w-[25px] h-[25px]">
+            <Spinner primary_color={"white"} />
+          </div>
+        );
+      }
+
+      function Categories() {
+        async function removeCategory() {
+          const result = await helpers.removeDialogBox(
+            "Remove Category",
+            selectedCategory
+          );
+
+          if (result === "removed") {
+            await server
+              .removeCategory(selectedCategory, selectedRestaurant)
+              .then((response) => {
+                updateCategories(selectedRestaurant);
+                helpers.popUpMessage(
+                  result,
+                  result === "cancelled" ? "error" : "success"
+                );
+              });
+          }
+        }
+
+        async function addCategory() {
+          const [params, result] = await helpers.addDialogBox("Category Name");
+
+          if (result) {
+            await server
+              .addNewCategory(result, selectedRestaurant)
+              .then((response) => {
+                updateCategories(selectedRestaurant);
+                helpers.popUpMessage(params[0], params[1]);
+                console.log(response);
+              });
+          }
+        }
+
+        function handleCategoryChange(e) {
+          setSelectedCategory(e.target.value);
+        }
+
+        return categories.length && !categoryLoading ? (
+          <div className="">
+            <div className="modify_restaurant absolute bottom-[15px] right-[15px] text-primary text-2xl flex justify-between w-[150px]">
+              <ModifyButtons
+                addFunction={addCategory}
+                removeFunction={removeCategory}
+              />
+            </div>
+            <select
+              name="category_name"
+              className="text-white w-[150px] h-fit overflow-visible"
+              defaultValue={selectedCategory}
+              onChange={handleCategoryChange}
+            >
+              {categories.map((category, index) => {
+                return (
+                  <option
+                    key={category.id}
+                    value={category.name}
+                    className="text-black"
+                  >
+                    {category.name.replaceAll("_", " ")}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        ) : (
+          <div className="w-[25px] h-[25px] flex">
+            <Spinner primary_color={"white"} />
+          </div>
+        );
       }
 
       return (
-        <div className="restaurant_name w-dvw bg-primary px-4 pt-24 pb-14 rounded-b-4xl flex justify-between relative">
-          <div className="modify_restaurant absolute bottom-[15px] text-primary text-2xl flex justify-between w-[150px]">
-            <ModifyButtons
-              addFunction={addRestaurant}
-              removeFunction={removeRestaurant}
-            />
-          </div>
-          <select
-            name="restaurant_name"
-            className="restaurant_name_selector text-white w-[150px]"
-            defaultValue={selectedRestaurant}
-            onChange={handleRestaurantChange}
-          >
-            {restaurants.map((restaurant) => {
-              return (
-                <option
-                  key={restaurant.id}
-                  value={restaurant.name}
-                  className="text-black"
-                >
-                  {restaurant.name}
-                </option>
-              );
-            })}
-          </select>
-          <div className="modify_restaurant absolute bottom-[15px] right-[15px] text-primary text-2xl flex justify-between w-[150px]">
-            <ModifyButtons
-              addFunction={addCategory}
-              removeFunction={removeCategory}
-            />
-          </div>
-          <select
-            name="category_name"
-            className="text-white w-[150px] h-fit overflow-visible"
-            defaultValue={selectedCategory}
-            onChange={handleCategoryChange}
-          >
-            {categories.map((category, index) => {
-              return (
-                <option
-                  key={category.id}
-                  value={category.name}
-                  className="text-black"
-                >
-                  {category.name.replaceAll("_", " ")}
-                </option>
-              );
-            })}
-          </select>
+        <div className="w-dvw bg-primary px-4 pt-24 pb-14 rounded-b-4xl flex justify-between relative">
+          <Restaurants />
+          <Categories />
         </div>
       );
     }
@@ -353,90 +408,224 @@ function Admin() {
     function Dishes() {
       const [dishes, setDishes] = useState([]);
 
-      useEffect(() => {
-        async function getData() {
-          if (selectedRestaurant && selectedCategory) {
-            const data = await server.getDishes(
-              selectedRestaurant,
-              selectedCategory
-            );
-            setDishes(data.dishes);
-          }
-        }
-        getData();
-      }, [selectedRestaurant, selectedCategory]);
-
-      async function handleImageUpload(dish_name) {
-        const file = await helpers.addImageDialogBox("Add Dish Image");
-        if (file.length > 1) {
-          helpers.popUpMessage("Data Updated", "success");
-          const base64 = await helpers.fileToBase64(file[1]);
-          // console.log(base64);
-          const response = await server.addDishImage(
+      async function updateDishes() {
+        if (selectedRestaurant && selectedCategory) {
+          const data = await server.getDishes(
             selectedRestaurant,
-            selectedCategory,
-            dish_name,
-            base64
+            selectedCategory
           );
-          console.log(response);
-        } else {
-          helpers.popUpMessage("Cancelled", "error");
+          setDishes(data.dishes);
         }
       }
 
-      async function handleImageRemove(dish_name) {
-        console.log(dish_name);
+      useEffect(() => {
+        updateDishes();
+      }, [selectedRestaurant, selectedCategory]);
+
+      function Dish({ dish }) {
+        const [loading, setLoading] = useState(false);
+
+        function DishImage({ dish }) {
+          async function handleImageUpload(dish_name) {
+            setLoading(true);
+            const response = await helpers.addImageDialogBox("Add Dish Image");
+
+            if (response[0][0] === "Success") {
+              console.log("hi");
+              if (typeof response[1] == "object") {
+                const base64 = await helpers.fileToBase64(response[1]);
+
+                const result = await server.addDishImage(
+                  selectedRestaurant,
+                  selectedCategory,
+                  dish_name,
+                  base64
+                );
+                if (!result)
+                  helpers.popUpMessage(
+                    "invalid foramt or image too large",
+                    "error"
+                  );
+                else helpers.popUpMessage("Data Updated", "success");
+              } else {
+                helpers.popUpMessage("Cancelled", "error");
+              }
+            } else {
+              helpers.popUpMessage(response[0][0], response[0][1]);
+            }
+            await updateDishes();
+            setLoading(false);
+          }
+
+          async function handleImageRemove(dish_name) {
+            setLoading(true);
+            const response = await helpers.removeDialogBox(
+              "Remove Dish Image",
+              ""
+            );
+
+            if (response === "cancelled")
+              helpers.popUpMessage("Cancelled", "error");
+            else {
+              const response = await server.removeDishImage(
+                selectedRestaurant,
+                selectedCategory,
+                dish_name
+              );
+
+              if (response.message == "Image removed successfully")
+                helpers.popUpMessage("Image Removed", "success");
+            }
+            await updateDishes();
+            setLoading(false);
+          }
+
+          return dish.image ? (
+            <div className="relative" key={dish.dish_name}>
+              <img src={dish.image} alt="" className="w-32 h-fit rounded-md" />
+              <i
+                className={`bx bx-minus absolute top-[-10px] right-[-10px] bg-red-400
+                text-2xl text-white rounded-full`}
+                onClick={() => handleImageRemove(dish.dish_name)}
+              ></i>
+              <i
+                className={`bx bx-edit-alt bg-white absolute rounded-full bottom-[-10px]
+                right-[-10px] text-xl p-1 shadow-xl text-primary border border-gray-400`}
+                onClick={() => handleImageUpload(dish.dish_name)}
+              ></i>
+            </div>
+          ) : (
+            <button
+              className="rounded-md w-32 border border-gray-300 relative"
+              onClick={() => handleImageUpload(dish.dish_name)}
+              key={dish.menu_item_id}
+            >
+              <i className="bx bx-bowl-hot text-3xl text-gray-300"></i>
+              <i
+                className={`bx bxs-plus-circle text-2xl text-gray-300 absolute
+                bottom-[-10px] right-[-10px] opacity-75 bg-white rounded-full`}
+              ></i>
+            </button>
+          );
+        }
+
+        async function updatePrice() {
+          const result = await helpers.addDialogBox("New Price");
+          setLoading(true);
+
+          if (result[0][0] == "Success") {
+            const response = await server.updateDishPrice(
+              selectedRestaurant,
+              selectedCategory,
+              dish.dish_name,
+              result[1]
+            );
+
+            if (response.message == "Price updated successfully") {
+              helpers.popUpMessage("Price Updated", "success");
+            } else {
+              helpers.popUpMessage("Error", "error");
+            }
+          } else {
+            helpers.popUpMessage(result[0][0], result[0][1]);
+          }
+
+          await updateDishes();
+          setLoading(false);
+        }
+
+        return (
+          <div
+            className={`dish flex justify-between gap-5 shadow p-2 py-3 rounded-2xl 
+                        border border-gray-300 relative`}
+          >
+            <DishImage dish={dish} />
+            <div className="w-full">
+              <h2 className="font-semibold">{dish.dish_name}</h2>
+              <span className="text-primary inline-block mt-1 relative">
+                ₹{dish.price}/-
+                <button
+                  className="inline-block ml-2 text-xl absolute active:shadow transition-all rounded-full px-2"
+                  onClick={updatePrice}
+                >
+                  <i className="bx bxs-edit"></i>
+                </button>
+              </span>
+            </div>
+            {loading && (
+              <div
+                className="flex justify-center items-center w-[20px] h-[20px] absolute bottom-[5px] right-[10px]"
+                key={dish.menu_item_id}
+              >
+                <Spinner />
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      function AddNewDish() {
+        const [loading, setLoading] = useState(false);
+
+        async function newDishForm() {
+          const dish_name = await helpers.addDialogBox("New Dish Name");
+          const new_name = dish_name[1];
+          const regex = new RegExp(new_name, "i");
+          setLoading(true);
+
+          if (dish_name[0][0] == "Success") {
+            const table = await server.getTableContent("menu_items");
+
+            const dish_names = table.map((dish) => dish.name);
+
+            const result = dish_names.filter((dish_name) =>
+              regex.test(dish_name)
+            );
+            console.log(result);
+          } else {
+            helpers.popUpMessage(dish_name[0][0], dish_name[0][1]);
+          }
+
+          setLoading(false);
+        }
+
+        return (
+          dishes.length > 0 && (
+            <button
+              className={`border w-fit px-3 rounded-xl bg-primary text-white py-2 
+              active:text-primary active:bg-white transition-all border-primary 
+              flex items-center justify-center gap-2`}
+              onClick={newDishForm}
+            >
+              {loading && (
+                <div className="inline-block w-[24px] h-[24px]">
+                  <Spinner primary_color="white" />
+                </div>
+              )}
+              Add Dish
+            </button>
+          )
+        );
       }
 
       return (
-        <div className="dishes pb-10 px-4 flex flex-col gap-3 mt-3">
-          {dishes.map((dish, index) => {
-            return (
-              <div
-                key={index}
-                className={`dish flex justify-between gap-5 shadow p-2 py-3 rounded-2xl 
-                  border border-gray-300`}
-              >
-                {dish.image ? (
-                  <div className="relative">
-                    <img
-                      src={dish.image}
-                      alt=""
-                      className="w-32 h-fit rounded-md"
-                    />
-                    <i
-                      className={`bx bx-minus absolute top-[-10px] right-[-10px] bg-red-400 
-                        text-2xl text-white rounded-full`}
-                      onClick={() => handleImageRemove(dish.dish_name)}
-                    ></i>
-                    <i
-                      className={`bx bx-edit-alt bg-white absolute rounded-full bottom-[-10px] 
-                        right-[-10px] text-xl p-1 shadow-xl text-primary border border-gray-400`}
-                      onClick={(e) => handleImageUpload(e, dish.dish_name)}
-                    ></i>
-                  </div>
-                ) : (
-                  <button
-                    className="rounded-md w-32 border border-gray-300 relative"
-                    onClick={(e) => handleImageUpload(e, dish.dish_name)}
-                  >
-                    <i className="bx bx-bowl-hot text-3xl text-gray-300"></i>
-                    <i
-                      className={`bx bxs-plus-circle text-2xl text-gray-300 absolute 
-                        bottom-[-10px] right-[-10px] opacity-75 bg-white rounded-full`}
-                    ></i>
-                  </button>
-                )}
-
-                <div className="w-full">
-                  <h2 className="font-semibold">{dish.dish_name}</h2>
-                  <span className="text-primary inline-block mt-1">
-                    ₹{dish.price}/-
-                  </span>
-                </div>
-              </div>
-            );
-          })}
+        <div
+          className="dishes pb-10 px-4 flex flex-col gap-3 mt-3 relative"
+          key="dishes"
+        >
+          <AddNewDish />
+          {dishes.length > 1 ? (
+            dishes.map((dish, index) => {
+              return <Dish dish={dish} key={index} index={index} />;
+            })
+          ) : (
+            <div
+              className="flex justify-center items-center w-[50px] h-[50px] mt-25 absolute top-1/2 left-1/2 -translate-1/2"
+              key="spinner"
+            >
+              <Spinner />
+            </div>
+          )}
         </div>
       );
     }

@@ -182,7 +182,7 @@ export async function addImageDialogBox(question) {
   });
 }
 
-const fileToBase64 = (file) => {
+export const fileToBase64 = (file) => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
@@ -198,4 +198,6 @@ export default {
   removeDialogBox,
   addImageDialogBox,
   fileToBase64,
+  // Spinner,
+  // SpinnerWhite,
 };
