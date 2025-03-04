@@ -427,11 +427,10 @@ function Admin() {
 
         function DishImage({ dish }) {
           async function handleImageUpload(dish_name) {
-            setLoading(true);
             const response = await helpers.addImageDialogBox("Add Dish Image");
+            setLoading(true);
 
             if (response[0][0] === "Success") {
-              console.log("hi");
               if (typeof response[1] == "object") {
                 const base64 = await helpers.fileToBase64(response[1]);
 
@@ -458,11 +457,11 @@ function Admin() {
           }
 
           async function handleImageRemove(dish_name) {
-            setLoading(true);
             const response = await helpers.removeDialogBox(
               "Remove Dish Image",
               ""
             );
+            setLoading(true);
 
             if (response === "cancelled")
               helpers.popUpMessage("Cancelled", "error");
@@ -537,7 +536,7 @@ function Admin() {
         return (
           <div
             className={`dish flex justify-between gap-5 shadow p-2 py-3 rounded-2xl 
-                        border border-gray-300 relative`}
+                        border border-gray-300 relative pr-12`}
           >
             <DishImage dish={dish} />
             <div className="w-full">
@@ -551,6 +550,13 @@ function Admin() {
                   <i className="bx bxs-edit"></i>
                 </button>
               </span>
+              <button
+                className={`bg-red-400 rounded-xl text-white px-[4px] pt-[1px] absolute top-[5px] right-[5px] border-2 
+                  border-red-400 active:bg-white active:text-red-400 text-xl transition-all`}
+                onClick={() => removeDish(dish)}
+              >
+                <i className="bx bx-minus"></i>
+              </button>
             </div>
             {loading && (
               <div
@@ -568,24 +574,30 @@ function Admin() {
         const [loading, setLoading] = useState(false);
 
         async function newDishForm() {
-          const dish_name = await helpers.addDialogBox("New Dish Name");
-          const new_name = dish_name[1];
-          const regex = new RegExp(new_name, "i");
+          const dish_name = await helpers.addNewDishDialogBox("New Dish Name");
           setLoading(true);
 
           if (dish_name[0][0] == "Success") {
-            const table = await server.getTableContent("menu_items");
-
-            const dish_names = table.map((dish) => dish.name);
-
-            const result = dish_names.filter((dish_name) =>
-              regex.test(dish_name)
+            const response = await server.addNewDish(
+              selectedRestaurant,
+              selectedCategory,
+              dish_name[1]
             );
-            console.log(result);
+            if (
+              response.message ===
+              "Dish already exists for this restaurant and category"
+            ) {
+              helpers.popUpMessage("Dish already Exists");
+            } else if (response.message === "Dish added successfully") {
+              helpers.popUpMessage("Dish added", dish_name[0][1]);
+            } else {
+              helpers.popUpMessage("Error Adding Dish", "error");
+            }
           } else {
             helpers.popUpMessage(dish_name[0][0], dish_name[0][1]);
           }
 
+          await updateDishes();
           setLoading(false);
         }
 
@@ -606,6 +618,29 @@ function Admin() {
             </button>
           )
         );
+      }
+
+      async function removeDish(dish) {
+        const response = await helpers.removeDialogBox(
+          "Remove Dish",
+          dish.dish_name
+        );
+
+        if (response === "removed") {
+          const result = await server.removeDish(
+            selectedRestaurant,
+            selectedCategory,
+            dish.dish_name
+          );
+
+          if (result.message === "Dish removed successfully") {
+            helpers.popUpMessage("Dish Removed", "success");
+          } else {
+            helpers.popUpMessage("Error Removing Dish", "error");
+          }
+        } else helpers.popUpMessage("cancelled", "error");
+
+        await updateDishes();
       }
 
       return (

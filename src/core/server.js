@@ -1,8 +1,8 @@
 const dev_url = "http://localhost:3000";
 const prod_url = "https://kk-server.vercel.app";
-const server_url = dev_url;
+const server_url = prod_url;
 
-function SearchForTerm(search_term) {
+async function SearchForTerm(search_term) {
   return 0;
 }
 
@@ -266,6 +266,54 @@ async function updateDishPrice(
   }
 }
 
+async function addNewDish(restaurant_name, category_name, dish_name) {
+  try {
+    const response = await fetch(server_url + "/add_new_dish", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        restaurant_name: restaurant_name,
+        category_name: category_name,
+        dish_name: dish_name,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! addDishImage: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error adding dish image:", error);
+    return null;
+  }
+}
+
+async function removeDish(restaurant_name, category_name, dish_name) {
+  try {
+    const response = await fetch(server_url + "/remove_dish", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        restaurant_name: restaurant_name,
+        category_name: category_name,
+        dish_name: dish_name,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! addDishImage: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error adding dish image:", error);
+    return null;
+  }
+}
+
 export default {
   SearchForTerm,
   greet,
@@ -282,4 +330,6 @@ export default {
   addDishImage,
   removeDishImage,
   updateDishPrice,
+  addNewDish,
+  removeDish,
 };
