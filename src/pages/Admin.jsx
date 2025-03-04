@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import server from "../core/server";
-import helpers from "../core/helpers.js";
+import helpers, { popUpMessage } from "../core/helpers.js";
 
 const months = [
   "january",
@@ -553,7 +553,7 @@ function Admin() {
               <button
                 className={`bg-red-400 rounded-xl text-white px-[4px] pt-[1px] absolute top-[5px] right-[5px] border-2 
                   border-red-400 active:bg-white active:text-red-400 text-xl transition-all`}
-                onClick={() => removeDish(dish)}
+                onClick={() => removeDish(dish, setLoading)}
               >
                 <i className="bx bx-minus"></i>
               </button>
@@ -620,7 +620,7 @@ function Admin() {
         );
       }
 
-      async function removeDish(dish) {
+      async function removeDish(dish, setLoading) {
         const response = await helpers.removeDialogBox(
           "Remove Dish",
           dish.dish_name
@@ -632,6 +632,8 @@ function Admin() {
             selectedCategory,
             dish.dish_name
           );
+          helpers.popUpMessage("removing_image");
+          setLoading(true);
 
           if (result.message === "Dish removed successfully") {
             helpers.popUpMessage("Dish Removed", "success");
@@ -640,6 +642,7 @@ function Admin() {
           }
         } else helpers.popUpMessage("cancelled", "error");
 
+        setLoading(false);
         await updateDishes();
       }
 

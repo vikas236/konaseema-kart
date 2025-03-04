@@ -113,9 +113,13 @@ const Auth = () => {
             Phone
           </label>
           <input
-            type="text"
+            type="number"
             id="name"
-            className="block w-full outline-none border-b-2 border-gray-300 pb-2 mt-2 transition-all text-lg placeholder:text-gray-200"
+            className={`block w-full outline-none border-b-2 border-gray-300 
+              pb-2 mt-2 transition-all text-lg placeholder:text-gray-200 
+              appearance-none [&::-webkit-inner-spin-button]:appearance-none 
+              [&::-webkit-outer-spin-button]:appearance-none 
+              [&::-moz-appearance:textfield] border p-2 rounded-md`}
             placeholder="your phone number"
             value={phoneNumber}
             onChange={(e) => setPhoneNumber(e.target.value)}
