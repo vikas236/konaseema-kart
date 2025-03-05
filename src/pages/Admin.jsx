@@ -420,7 +420,7 @@ function Admin() {
             selectedRestaurant,
             selectedCategory
           );
-          setDishes(data.dishes);
+          if (data && data.dishes.length) setDishes(data.dishes);
           setDishLoading(false);
         }
       }
