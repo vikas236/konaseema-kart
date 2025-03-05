@@ -358,6 +358,7 @@ function Admin() {
           );
 
           if (result === "removed") {
+            setCategoryLoading(true);
             await server
               .removeCategory(selectedCategory, selectedRestaurant)
               .then((response) => {
@@ -374,6 +375,7 @@ function Admin() {
           const [params, result] = await helpers.addDialogBox("Category Name");
 
           if (result) {
+            setCategoryLoading(true);
             await server
               .addNewCategory(result, selectedRestaurant)
               .then((response) => {
@@ -463,7 +465,6 @@ function Admin() {
               helpers.popUpMessage(response[0][0], response[0][1]);
             }
             await updateDishes(selectedRestaurant, selectedCategory);
-            setLoading(false);
           }
 
           async function handleImageRemove(dish_name) {
@@ -486,7 +487,6 @@ function Admin() {
                 helpers.popUpMessage("Image Removed", "success");
             }
             await updateDishes(selectedRestaurant, selectedCategory);
-            setLoading(false);
           }
 
           return dish.image ? (
@@ -540,7 +540,6 @@ function Admin() {
           }
 
           await updateDishes(selectedRestaurant, selectedCategory);
-          setLoading(false);
         }
 
         return (
@@ -563,7 +562,7 @@ function Admin() {
               <button
                 className={`bg-red-400 rounded-xl text-white px-[4px] pt-[1px] absolute top-[5px] right-[5px] border-2 
                   border-red-400 active:bg-white active:text-red-400 text-xl transition-all`}
-                onClick={() => removeDish(dish, setLoading)}
+                onClick={() => removeDish(dish)}
               >
                 <i className="bx bx-minus"></i>
               </button>
@@ -608,7 +607,6 @@ function Admin() {
           }
 
           await updateDishes(selectedRestaurant, selectedCategory);
-          setLoading(false);
         }
 
         return (
@@ -651,7 +649,6 @@ function Admin() {
           }
         } else helpers.popUpMessage("cancelled", "error");
 
-        setDishLoading(false);
         await updateDishes(selectedRestaurant, selectedCategory);
       }
 
