@@ -221,7 +221,6 @@ function Admin() {
       restaurants[0]?.name
     );
     const [selectedCategory, setSelectedCategory] = useState("");
-    const [dishes, setDishes] = useState([]);
     const [restaurantLoading, setRestaurantLoading] = useState(false);
     const [categoryLoading, setCategoryLoading] = useState(false);
     const [dishLoading, setDishLoading] = useState(false);
@@ -423,6 +422,8 @@ function Admin() {
     }
 
     function Dishes() {
+      const [dishes, setDishes] = useState([]);
+
       async function updateDishes() {
         if (selectedRestaurant && selectedCategory) {
           const data = await server.getDishes(
