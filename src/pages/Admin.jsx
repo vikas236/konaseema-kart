@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useTransition } from "react";
 import server from "../core/server";
 import helpers, { popUpMessage } from "../core/helpers.js";
+import { useNavigate } from "react-router-dom";
 
 const months = [
   "january",
@@ -43,6 +44,14 @@ function Spinner({ primary_color }) {
 }
 
 function Admin() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    const admin_user = localStorage.getItem("kk_admin_user");
+    if (!admin_user) {
+      if (admin_user != "in") navigate("/admin_auth");
+    }
+  });
+
   const now = new Date();
   const [activeModule, setActiveModule] = useState("2");
   const [selectedDate, setSelectedDate] = useState([

@@ -19,6 +19,7 @@ import Dock from "./pages/Dock.jsx";
 import Auth from "./pages/Auth.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Payment from "./pages/Payment.jsx";
+import AdminAuth from "./pages/AdminAuth.jsx";
 
 function App() {
   const location = useLocation();
@@ -31,7 +32,7 @@ function App() {
   useEffect(() => {
     const root = document.querySelector("#root");
     const app = document.querySelector(".app");
-    if (location.pathname === "/admin") {
+    if (location.pathname === "/admin" || location.pathname === "/admin_auth") {
       root.classList.remove("pb-[70px]");
       root.classList.remove("px-5");
       app.classList.remove("py-3");
@@ -70,6 +71,7 @@ function App() {
           element={<Admin cartItems={cartItems} setCartItems={setCartItems} />}
         />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/admin_auth" element={<AdminAuth />} />
         <Route path="*" element={<NotFound />} />
         {/* <Route path="/payment" element={<Payment />} /> */}
       </Routes>

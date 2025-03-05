@@ -145,7 +145,7 @@ const Auth = () => {
           className="w-[calc(100dvw-50px)] bg-primary text-white px-4 py-3 rounded-md mt-4 absolute active:opacity-90 transition-all"
           onClick={handleSubmit}
         >
-          {loading ? "Loading..." : "Login"}
+          {loading ? "Loading..." : "Save and Continue"}
           {error && (
             <span className="absolute -top-[22px] left-0 text-xs text-red-500">
               {error}

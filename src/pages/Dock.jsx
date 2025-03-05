@@ -18,7 +18,13 @@ const DockLink = ({ icon_type, page_name, path }) => {
 
 const Dock = ({ cartItems, redirectCart = "/cart" }) => {
   const location = useLocation();
-  const disallowed_pathnames = ["/cart", "/admin", "/auth", "/payment"];
+  const disallowed_pathnames = [
+    "/cart",
+    "/admin",
+    "/auth",
+    "/payment",
+    "/admin_auth",
+  ];
 
   const links = [
     { icon_type: "bxs-home", page_name: "Home", path: "/" },
