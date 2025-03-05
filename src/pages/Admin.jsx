@@ -663,7 +663,7 @@ function Admin() {
           {!dishLoading && <AddNewDish />}
           {!dishLoading ? (
             <>
-              {dishes.length ? (
+              {dishes && dishes.length ? (
                 dishes.map((dish, index) => {
                   return <Dish dish={dish} key={index} index={index} />;
                 })
