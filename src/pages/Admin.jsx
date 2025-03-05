@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useTransition } from "react";
 import server from "../core/server";
 import helpers, { popUpMessage } from "../core/helpers.js";
 
@@ -212,20 +212,26 @@ function Admin() {
       restaurants[0]?.name
     );
     const [selectedCategory, setSelectedCategory] = useState("");
+    const [restaurantLoading, setRestaurantLoading] = useState(false);
     const [categoryLoading, setCategoryLoading] = useState(false);
+    const [dishLoading, setDishLoading] = useState(false);
 
     useEffect(() => {
       updateRestaurants();
     }, []);
 
     async function updateRestaurants() {
+      setRestaurantLoading(true);
+      setCategoryLoading(true);
       const data = await server.getRestaurantNames();
       setRestaurants(data);
       setSelectedRestaurant(data[0]?.name);
+      setRestaurantLoading(false);
       updateCategories(data[0]?.name);
     }
 
     async function updateCategories(restaurant) {
+      setDishLoading(true);
       const data = await server.getCategoryNames(restaurant);
       setCategories(data);
       setSelectedCategory(data[0]?.name);
@@ -276,10 +282,12 @@ function Admin() {
           const [params, result] = await helpers.addDialogBox(
             "Restaurant Name"
           );
+          setRestaurantLoading(true);
 
           if (result) {
             await server.addNewRestaurant(result).then((response) => {
               updateRestaurants();
+              setRestaurantLoading(true);
               helpers.popUpMessage(params[0], params[1]);
             });
           }
@@ -291,7 +299,7 @@ function Admin() {
           setSelectedRestaurant(e.target.value);
         }
 
-        return restaurants.length ? (
+        return !restaurantLoading ? (
           <div className="">
             <div className="modify_restaurant absolute bottom-[15px] text-primary text-2xl flex justify-between w-[150px]">
               <ModifyButtons
@@ -363,7 +371,7 @@ function Admin() {
           setSelectedCategory(e.target.value);
         }
 
-        return categories.length && !categoryLoading ? (
+        return !categoryLoading ? (
           <div className="">
             <div className="modify_restaurant absolute bottom-[15px] right-[15px] text-primary text-2xl flex justify-between w-[150px]">
               <ModifyButtons
@@ -415,6 +423,7 @@ function Admin() {
             selectedCategory
           );
           setDishes(data.dishes);
+          setDishLoading(false);
         }
       }
 
@@ -602,7 +611,7 @@ function Admin() {
         }
 
         return (
-          dishes.length > 0 && (
+          !dishLoading && (
             <button
               className={`border w-fit px-3 rounded-xl bg-primary text-white py-2 
               active:text-primary active:bg-white transition-all border-primary 
@@ -620,11 +629,12 @@ function Admin() {
         );
       }
 
-      async function removeDish(dish, setLoading) {
+      async function removeDish(dish) {
         const response = await helpers.removeDialogBox(
           "Remove Dish",
           dish.dish_name
         );
+        setDishLoading(true);
 
         if (response === "removed") {
           const result = await server.removeDish(
@@ -632,8 +642,6 @@ function Admin() {
             selectedCategory,
             dish.dish_name
           );
-          helpers.popUpMessage("removing_image");
-          setLoading(true);
 
           if (result.message === "Dish removed successfully") {
             helpers.popUpMessage("Dish Removed", "success");
@@ -642,7 +650,7 @@ function Admin() {
           }
         } else helpers.popUpMessage("cancelled", "error");
 
-        setLoading(false);
+        setDishLoading(false);
         await updateDishes();
       }
 
@@ -652,10 +660,18 @@ function Admin() {
           key="dishes"
         >
           <AddNewDish />
-          {dishes.length > 1 ? (
-            dishes.map((dish, index) => {
-              return <Dish dish={dish} key={index} index={index} />;
-            })
+          {!dishLoading ? (
+            <>
+              {dishes.length ? (
+                dishes.map((dish, index) => {
+                  return <Dish dish={dish} key={index} index={index} />;
+                })
+              ) : (
+                <h2 className="text-center text-2xl text-gray-400 font-semibold mt-25">
+                  No Dishes
+                </h2>
+              )}
+            </>
           ) : (
             <div
               className="flex justify-center items-center w-[50px] h-[50px] mt-25 absolute top-1/2 left-1/2 -translate-1/2"
