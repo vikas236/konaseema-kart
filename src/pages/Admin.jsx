@@ -221,6 +221,7 @@ function Admin() {
       restaurants[0]?.name
     );
     const [selectedCategory, setSelectedCategory] = useState("");
+    const [dishes, setDishes] = useState([]);
     const [restaurantLoading, setRestaurantLoading] = useState(false);
     const [categoryLoading, setCategoryLoading] = useState(false);
     const [dishLoading, setDishLoading] = useState(false);
@@ -246,6 +247,21 @@ function Admin() {
       setSelectedCategory(data[0]?.name);
       setCategoryLoading(false);
     }
+
+    async function updateDishes() {
+      if (selectedRestaurant && selectedCategory) {
+        const data = await server.getDishes(
+          selectedRestaurant,
+          selectedCategory
+        );
+        if (data && data.dishes.length) setDishes(data.dishes);
+        setDishLoading(false);
+      }
+    }
+
+    useEffect(() => {
+      updateDishes();
+    }, [selectedRestaurant, selectedCategory]);
 
     // restaurant and category selection component
     function RestaurantSelection() {
@@ -422,23 +438,6 @@ function Admin() {
     }
 
     function Dishes() {
-      const [dishes, setDishes] = useState([]);
-
-      async function updateDishes() {
-        if (selectedRestaurant && selectedCategory) {
-          const data = await server.getDishes(
-            selectedRestaurant,
-            selectedCategory
-          );
-          if (data && data.dishes.length) setDishes(data.dishes);
-          setDishLoading(false);
-        }
-      }
-
-      useEffect(() => {
-        updateDishes();
-      }, [selectedRestaurant, selectedCategory]);
-
       function Dish({ dish }) {
         const [loading, setLoading] = useState(false);
 
