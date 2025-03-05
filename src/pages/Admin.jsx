@@ -246,22 +246,14 @@ function Admin() {
       setCategories(data);
       setSelectedCategory(data[0]?.name);
       setCategoryLoading(false);
+      updateDishes(restaurant, data[0]?.name);
     }
 
-    async function updateDishes() {
-      if (selectedRestaurant && selectedCategory) {
-        const data = await server.getDishes(
-          selectedRestaurant,
-          selectedCategory
-        );
-        if (data && data.dishes.length) setDishes(data.dishes);
-        setDishLoading(false);
-      }
+    async function updateDishes(restaurant_name, category_name) {
+      const data = await server.getDishes(restaurant_name, category_name);
+      setDishes(data.dishes);
+      setDishLoading(false);
     }
-
-    useEffect(() => {
-      updateDishes();
-    }, [selectedRestaurant, selectedCategory]);
 
     // restaurant and category selection component
     function RestaurantSelection() {
@@ -392,6 +384,8 @@ function Admin() {
         }
 
         function handleCategoryChange(e) {
+          setDishLoading(true);
+          updateDishes(selectedRestaurant, e.target.value);
           setSelectedCategory(e.target.value);
         }
 
@@ -468,7 +462,7 @@ function Admin() {
             } else {
               helpers.popUpMessage(response[0][0], response[0][1]);
             }
-            await updateDishes();
+            await updateDishes(selectedRestaurant, selectedCategory);
             setLoading(false);
           }
 
@@ -491,7 +485,7 @@ function Admin() {
               if (response.message == "Image removed successfully")
                 helpers.popUpMessage("Image Removed", "success");
             }
-            await updateDishes();
+            await updateDishes(selectedRestaurant, selectedCategory);
             setLoading(false);
           }
 
@@ -545,7 +539,7 @@ function Admin() {
             helpers.popUpMessage(result[0][0], result[0][1]);
           }
 
-          await updateDishes();
+          await updateDishes(selectedRestaurant, selectedCategory);
           setLoading(false);
         }
 
@@ -613,7 +607,7 @@ function Admin() {
             helpers.popUpMessage(dish_name[0][0], dish_name[0][1]);
           }
 
-          await updateDishes();
+          await updateDishes(selectedRestaurant, selectedCategory);
           setLoading(false);
         }
 
@@ -658,7 +652,7 @@ function Admin() {
         } else helpers.popUpMessage("cancelled", "error");
 
         setDishLoading(false);
-        await updateDishes();
+        await updateDishes(selectedRestaurant, selectedCategory);
       }
 
       return (
@@ -666,7 +660,7 @@ function Admin() {
           className="dishes pb-10 px-4 flex flex-col gap-3 mt-3 relative"
           key="dishes"
         >
-          <AddNewDish />
+          {!dishLoading && <AddNewDish />}
           {!dishLoading ? (
             <>
               {dishes.length ? (
