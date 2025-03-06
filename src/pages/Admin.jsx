@@ -530,6 +530,7 @@ function Admin() {
               result[1]
             );
 
+            await updateDishes(selectedRestaurant, selectedCategory);
             if (response.message == "Price updated successfully") {
               helpers.popUpMessage("Price Updated", "success");
             } else {
@@ -539,7 +540,6 @@ function Admin() {
             helpers.popUpMessage(result[0][0], result[0][1]);
           }
 
-          await updateDishes(selectedRestaurant, selectedCategory);
         }
 
         return (
