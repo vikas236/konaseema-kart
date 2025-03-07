@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
 import server from "../core/server.js";
-import { useActionState } from "react";
+import dish_filler from "../assets/dish_filler.png";
 
 function Spinner({ primary_color }) {
   let bg_color, text_color;
@@ -160,7 +160,7 @@ const Carousel = ({
             <div
               key={index}
               className="h-full w-fit cursor-pointer"
-              onClick={() => index < menu_items.length && setActiveIndex(index)}
+              onClick={() => index < dishes.length && setActiveIndex(index)}
             >
               <div
                 className={`w-full flex flex-col items-center bg-gray-100/50 pb-2 pt-2 px-2 relative ${
@@ -194,7 +194,7 @@ const Carousel = ({
         </div>
       )}
       {!recipesLoading ? (
-        <div className="dishes">
+        <div className="dishes flex flex-wrap gap-2 justify-between">
           {dishes.length &&
             dishes?.map((e, i) => {
               let price = e.price;
@@ -206,8 +206,22 @@ const Carousel = ({
                 price += 20;
 
               return (
-                <div className="dish w-full" key={e.dish_name}>
-                  <div className="dish_name p-5 bg-gray-100 mb-2 border border-gray-200 rounded-xl">
+                <div
+                  className="dish w-[calc(50%-10px)] p-5 mb-2 border border-gray-200 rounded-xl shadow relative pt-14 mt-14"
+                  key={e.dish_name}
+                >
+                  <div
+                    className={`w-[65%] h-fit absolute rounded-full p-7 left-1/2 -top-[50%] border border-gray-100 shadow 
+                        translate-y-1/3 -translate-x-1/2 bg-white`}
+                  >
+                    <img
+                      src={e.image ? e.image : dish_filler}
+                      alt=""
+                      className=""
+                    />
+                  </div>
+
+                  <div className="dish_name mt-3">
                     <h2 className="dish_name">{e.dish_name}</h2>
                     <div className="dish_price text-[#307a59] flex items-center justify-between mt-5">
                       <span>₹{price}/-</span>
