@@ -539,7 +539,6 @@ function Admin() {
           } else {
             helpers.popUpMessage(result[0][0], result[0][1]);
           }
-
         }
 
         return (

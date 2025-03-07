@@ -1,19 +1,74 @@
 import React, { useEffect, useState } from "react";
 import Slider from "react-slick";
+import server from "../core/server.js";
+import { useActionState } from "react";
+
+function Spinner({ primary_color }) {
+  let bg_color, text_color;
+  if (primary_color == "white") {
+    bg_color = "bg-white";
+    text_color = "bg-primary";
+  } else {
+    text_color = "bg-white";
+    bg_color = "bg-primary";
+  }
+
+  return (
+    <div className="w-full h-full relative overflow-hidden rounded-full animate-spin">
+      <span
+        className={`w-[60%] h-full absolute top-1/2 left-1/2 ${bg_color} z-10`}
+      ></span>
+      <span
+        className={`w-full h-full absolute left-0 rounded-full opacity-25 ${bg_color} z-10`}
+      ></span>
+      <span
+        className={`w-[75%] h-[75%] absolute top-1/2 left-1/2 -translate-1/2 ${text_color} rounded-full z-30`}
+      ></span>
+    </div>
+  );
+}
 
 const Carousel = ({
-  carouselContent,
   carouselSettings,
   menu_items,
   cartItems,
   setCartItems,
 }) => {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setcategoriesLoading] = useState(true);
+  const [recipesLoading, setRecipesLoading] = useState(true);
+  const [dishes, setDishes] = useState();
+  const active_restaurant = localStorage.getItem("kk_active_restaurant");
 
   const settings = {
     ...carouselSettings,
     beforeChange: (oldIndex, newIndex) => setActiveIndex(newIndex),
   };
+
+  async function getCategoryNames() {
+    const categories = await server.getCategoryNames(active_restaurant);
+    setCategories(categories);
+    setcategoriesLoading(false);
+    setRecipesLoading(true);
+    getDishes(categories);
+  }
+
+  useEffect(() => {
+    getCategoryNames();
+  }, [setcategoriesLoading]);
+
+  async function getDishes(categories) {
+    const recipes = await server.getDishes(
+      active_restaurant,
+      categories[activeIndex].name
+    );
+
+    setDishes(recipes.dishes);
+    setRecipesLoading(false);
+  }
+
+  useEffect(() => {});
 
   function CartIcon({ dish_name, dish_price }) {
     const item = cartItems.find((e) => e.name === dish_name);
@@ -99,60 +154,77 @@ const Carousel = ({
 
   return (
     <div className="w-full max-w-3xl mx-auto mt-1 pt-2 pb-22">
-      <Slider {...settings}>
-        {carouselContent.map((item, index) => (
-          <div
-            key={index}
-            className="h-full w-fit cursor-pointer"
-            onClick={() => index < menu_items.length && setActiveIndex(index)}
-          >
+      {!categoriesLoading ? (
+        <Slider {...settings}>
+          {categories.map((item, index) => (
             <div
-              className={`w-full flex flex-col items-center bg-gray-100/50 pb-2 pt-2 px-2 relative ${
-                activeIndex === index
-                  ? "after:w-[25px] after:absolute after:h-[5px] after:bg-[#307a59] after:bottom-0 after:rounded-lg"
-                  : ""
-              }`}
+              key={index}
+              className="h-full w-fit cursor-pointer"
+              onClick={() => index < menu_items.length && setActiveIndex(index)}
             >
-              {item.image && (
-                <img
-                  src={item.image}
-                  alt={item.name}
-                  className="w-full object-cover rounded-xl"
-                />
-              )}
-              <h3 className="w-full mt-1 pl-1 font-normal text-center">
-                {item.name}
-              </h3>
-              <p className="w-full mt-1 pl-1 text-sm font-semibold text-[#307a59]">
-                {item.cost}
-              </p>
-            </div>
-          </div>
-        ))}
-      </Slider>
-      <div className="dishes">
-        {menu_items[Math.floor(activeIndex)]?.map((e, i) => {
-          let price = e[1];
-          if (
-            localStorage.getItem("kk_active_restaurant") ===
-              "vindhu family restaruant" &&
-            e[1] >= 100
-          )
-            price = e[1] + 20;
-
-          return (
-            <div className="dish w-full" key={i}>
-              <div className="dish_name p-5 bg-gray-100 mb-2 border border-gray-200 rounded-xl">
-                <h2 className="dish_name">{e[0]}</h2>
-                <div className="dish_price text-[#307a59] flex items-center justify-between mt-5">
-                  <span>₹{price}/-</span>
-                  <CartIcon dish_name={e[0]} dish_price={price} />
-                </div>
+              <div
+                className={`w-full flex flex-col items-center bg-gray-100/50 pb-2 pt-2 px-2 relative ${
+                  activeIndex === index
+                    ? "after:w-[25px] after:absolute after:h-[5px] after:bg-[#307a59] after:bottom-0 after:rounded-lg"
+                    : ""
+                }`}
+              >
+                {item.image && (
+                  <img
+                    src={item.image}
+                    alt={item.name}
+                    className="w-full object-cover rounded-xl"
+                  />
+                )}
+                <h3 className="w-full mt-1 pl-1 font-normal text-center">
+                  {item.name}
+                </h3>
+                <p className="w-full mt-1 pl-1 text-sm font-semibold text-[#307a59]">
+                  {item.cost}
+                </p>
               </div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </Slider>
+      ) : (
+        <div className="flex justify-center items-center pb-4">
+          <div className="w-[35px] h-[35px] ">
+            <Spinner />
+          </div>
+        </div>
+      )}
+      {!recipesLoading ? (
+        <div className="dishes">
+          {dishes.length &&
+            dishes?.map((e, i) => {
+              let price = e.price;
+              if (
+                localStorage.getItem("kk_active_restaurant") ===
+                  "vindhu family restaruant" &&
+                e[1] >= 100
+              )
+                price += 20;
+
+              return (
+                <div className="dish w-full" key={i}>
+                  <div className="dish_name p-5 bg-gray-100 mb-2 border border-gray-200 rounded-xl">
+                    <h2 className="dish_name">{e.dish_name}</h2>
+                    <div className="dish_price text-[#307a59] flex items-center justify-between mt-5">
+                      <span>₹{price}/-</span>
+                      <CartIcon dish_name={e[0]} dish_price={price} />
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+        </div>
+      ) : (
+        <div className="w-full h-full flex justify-center items-center mt-[50%] -translate-y-1/2">
+          <div className="w-[50px] h-[50px] ">
+            <Spinner />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
