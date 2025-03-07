@@ -64,7 +64,6 @@ const Carousel = ({
       categories[activeIndex].name
     );
 
-    console.log(recipes);
     setDishes(recipes.dishes);
     setRecipesLoading(false);
   }
