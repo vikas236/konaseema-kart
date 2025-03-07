@@ -64,6 +64,7 @@ const Carousel = ({
       categories[activeIndex].name
     );
 
+    console.log(recipes);
     setDishes(recipes.dishes);
     setRecipesLoading(false);
   }
@@ -206,12 +207,12 @@ const Carousel = ({
                 price += 20;
 
               return (
-                <div className="dish w-full" key={i}>
+                <div className="dish w-full" key={e.dish_name}>
                   <div className="dish_name p-5 bg-gray-100 mb-2 border border-gray-200 rounded-xl">
                     <h2 className="dish_name">{e.dish_name}</h2>
                     <div className="dish_price text-[#307a59] flex items-center justify-between mt-5">
                       <span>₹{price}/-</span>
-                      <CartIcon dish_name={e[0]} dish_price={price} />
+                      <CartIcon dish_name={e.dish_name} dish_price={price} />
                     </div>
                   </div>
                 </div>
