@@ -28,12 +28,7 @@ function Spinner({ primary_color }) {
   );
 }
 
-const Carousel = ({
-  carouselSettings,
-  menu_items,
-  cartItems,
-  setCartItems,
-}) => {
+const Carousel = ({ carouselSettings, cartItems, setCartItems }) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setcategoriesLoading] = useState(true);
@@ -51,24 +46,19 @@ const Carousel = ({
     setCategories(categories);
     setcategoriesLoading(false);
     setRecipesLoading(true);
-    getDishes(categories);
+    getDishes(categories[0].name);
   }
 
   useEffect(() => {
     getCategoryNames();
   }, [setcategoriesLoading]);
 
-  async function getDishes(categories) {
-    const recipes = await server.getDishes(
-      active_restaurant,
-      categories[activeIndex].name
-    );
+  async function getDishes(category) {
+    const recipes = await server.getDishes(active_restaurant, category);
 
     setDishes(recipes.dishes);
     setRecipesLoading(false);
   }
-
-  useEffect(() => {});
 
   function CartIcon({ dish_name, dish_price }) {
     const item = cartItems.find((e) => e.name === dish_name);
@@ -160,7 +150,13 @@ const Carousel = ({
             <div
               key={index}
               className="h-full w-fit cursor-pointer"
-              onClick={() => index < dish.length && setActiveIndex(index)}
+              onClick={() => {
+                if (index < dishes.length) {
+                  setActiveIndex(index);
+                  setRecipesLoading(true);
+                  getDishes(item.name);
+                }
+              }}
             >
               <div
                 className={`w-full flex flex-col items-center bg-gray-100/50 pb-2 pt-2 px-2 relative ${
@@ -172,12 +168,12 @@ const Carousel = ({
                 {item.image && (
                   <img
                     src={item.image}
-                    alt={item.name}
+                    alt={item.name.replaceAll("_", " ")}
                     className="w-full object-cover rounded-xl"
                   />
                 )}
                 <h3 className="w-full mt-1 pl-1 font-normal text-center">
-                  {item.name}
+                  {item.name.replaceAll("_", " ")}
                 </h3>
                 <p className="w-full mt-1 pl-1 text-sm font-semibold text-[#307a59]">
                   {item.cost}
