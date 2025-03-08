@@ -151,10 +151,11 @@ const Carousel = ({ carouselSettings, cartItems, setCartItems }) => {
               key={index}
               className="h-full w-fit cursor-pointer"
               onClick={() => {
-                if (index < dishes.length) {
+                if (index < categories.length) {
                   setActiveIndex(index);
                   setRecipesLoading(true);
                   getDishes(item.name);
+                  console.log(item.name);
                 }
               }}
             >
