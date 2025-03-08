@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { act, useEffect, useState } from "react";
 import Slider from "react-slick";
 import server from "../core/server.js";
 import { useActionState } from "react";
@@ -142,6 +142,14 @@ const Carousel = ({ carouselSettings, cartItems, setCartItems }) => {
     );
   }
 
+  useEffect(() => {
+    if (Math.floor(activeIndex) < categories.length) {
+      setRecipesLoading(true);
+      getDishes(categories[Math.floor(activeIndex)].name);
+      ``;
+    }
+  }, [activeIndex]);
+
   return (
     <div className="w-full max-w-3xl mx-auto mt-1 pt-2 pb-22">
       {!categoriesLoading ? (
@@ -152,9 +160,7 @@ const Carousel = ({ carouselSettings, cartItems, setCartItems }) => {
               className="h-full w-fit cursor-pointer"
               onClick={() => {
                 if (index < categories.length) {
-                  setActiveIndex(index);
-                  setRecipesLoading(true);
-                  getDishes(item.name);
+                  setActiveIndex(Math.floor(index));
                 }
               }}
             >
