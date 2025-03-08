@@ -155,7 +155,6 @@ const Carousel = ({ carouselSettings, cartItems, setCartItems }) => {
                   setActiveIndex(index);
                   setRecipesLoading(true);
                   getDishes(item.name);
-                  console.log(item.name);
                 }
               }}
             >
