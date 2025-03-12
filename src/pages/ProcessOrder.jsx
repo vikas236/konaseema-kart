@@ -244,6 +244,8 @@ function ProcessOrder({ cartItems }) {
         `📍 *Find on Google Maps:*  ${location_url}\n` +
         `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
 
+      console.log(chatId, botToken);
+
       const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?
       chat_id=${chatId}&text=${encodeURIComponent(
         message
