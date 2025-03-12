@@ -77,7 +77,9 @@ function App() {
         />
         <Route
           path="/processorder"
-          element={<ProcessOrder cartItems={cartItems} />}
+          element={
+            <ProcessOrder cartItems={cartItems} setCartItems={setCartItems} />
+          }
         />
         <Route path="/auth" element={<Auth />} />
         <Route path="/admin_auth" element={<AdminAuth />} />

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import helpers from "../core/helpers";
 
-function ProcessOrder({ cartItems }) {
+function ProcessOrder({ cartItems, setCartItems }) {
   const navigate = useNavigate();
   const restaurat_name = localStorage.getItem("kk_active_restaurant");
   const [phone, setPhone] = useState(
@@ -214,7 +214,28 @@ function ProcessOrder({ cartItems }) {
       } else helpers.popUpMessage("Cancelled", "error");
     }
 
-    function sendOrderMessage() {
+    async function sendOrderMessage() {
+      const totalAmount = cartItems.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      );
+
+      if (totalAmount >= 100) {
+        if (phone[0] && address[0]) {
+          if (!loading) {
+            setLoading(true);
+            const response = await helpers.removeDialogBox("Place order", "");
+            if (response == "removed") {
+              proceedToCheckout();
+            } else helpers.popUpMessage("cancelled", "error");
+            setLoading(false);
+          }
+        } else navigate("/auth");
+      } else {
+        setError("order should be above 100 rupees");
+        helpers.popUpMessage("order should be above 100 rupees", "error");
+      }
+
       let food_order_items = cartItems
         .map(
           (e) =>
@@ -228,12 +249,6 @@ function ProcessOrder({ cartItems }) {
       const location_url = localStorage.getItem("kk_location_url");
       const phone = localStorage.getItem("kk_phone");
 
-      const totalAmount = cartItems.reduce(
-        (total, item) => total + item.price * item.quantity,
-
-        0
-      );
-
       const message =
         `*Name* ${name}` +
         `📦 *New Order Received!* 📦\n\n` +
@@ -243,8 +258,6 @@ function ProcessOrder({ cartItems }) {
         `📍 *Address:* ${location}\n` +
         `📍 *Find on Google Maps:*  ${location_url}\n` +
         `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
-
-      console.log(chatId, botToken);
 
       const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?
       chat_id=${chatId}&text=${encodeURIComponent(
@@ -257,28 +270,26 @@ function ProcessOrder({ cartItems }) {
         .then((data) => {
           if (data.ok) {
             // Clear the cart
-
             setCartItems([]);
             localStorage.removeItem("kk_cart_items");
             helpers.popUpMessage("order placed", "success");
             setTimeout(async () => {
               await helpers.removeDialogBox(
                 "please wait for order confirmation",
-
                 "our representative will call you soon"
               );
             }, 500);
 
             navigate("/restaurants");
           } else {
-            helpers.popUpMessage("Error");
+            helpers.popUpMessage("Error", "error");
           }
         })
 
         .catch((error) => {
           console.error("Error sending message:", error);
 
-          helpers.popUpMessage("An error occurred");
+          helpers.popUpMessage("An error occurred", "error");
         });
     }
 
