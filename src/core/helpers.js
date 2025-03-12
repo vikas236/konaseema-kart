@@ -348,7 +348,7 @@ export async function addPhoneNumber(question, value) {
     dialog.innerHTML = `
       <div class="w-full flex flex-col justify-center items-center p-2">
         <h1 class="text-lg font-semibold w-full mt-2">${question}:</h1>
-        <input type="text" class="w-full p-2 border border-gray-300 rounded-md mt-4 
+        <input type="tel" class="w-full p-2 border border-gray-300 rounded-md mt-4 
         outline-none focus:outline-black" placeholder="Phone Number" autofocus 
         maxLength="10" />
       </div>

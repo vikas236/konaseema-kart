@@ -1,26 +1,26 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import helpers from "../core/helpers";
 
 function ProcessOrder({ cartItems }) {
   const navigate = useNavigate();
   const restaurat_name = localStorage.getItem("kk_active_restaurant");
-  const [phone, setPhone] = localStorage.getItem("kk_phone")
-    ? localStorage.getItem("kk_phone")
-    : "";
-  const [address, setAddress] = localStorage.getItem("kk_address")
-    ? localStorage.getItem("kk_address")
-    : "";
-  const [name, setName] = localStorage.getItem("kk_name")
-    ? localStorage.getItem("kk_name")
-    : "";
-  const [paymentMethod, setPaymentMethod] = useState(0);
+  const [phone, setPhone] = useState(
+    localStorage.getItem("kk_phone") ? localStorage.getItem("kk_phone") : ""
+  );
+  const [address, setAddress] = useState(
+    localStorage.getItem("kk_address") ? localStorage.getItem("kk_address") : ""
+  );
+  const [name, setName] = useState(
+    localStorage.getItem("kk_name") ? localStorage.getItem("kk_name") : ""
+  );
+  const [error, setError] = useState();
 
   function Dishes() {
     return (
       <div
         className="dishes border border-gray-200 p-2 rounded-lg 
-      relative"
+      relative flex flex-col gap-1"
       >
         {cartItems.map((dish, i) => {
           return (
@@ -35,7 +35,7 @@ function ProcessOrder({ cartItems }) {
           );
         })}
         <div
-          className="mt-4 text-md flex justify-between border-t 
+          className="mt-2 text-md flex justify-between border-t 
         border-gray-300 pt-2"
         >
           <span>Total</span>
@@ -63,7 +63,7 @@ function ProcessOrder({ cartItems }) {
   function PaymentMode() {
     return (
       <div
-        className="paymentmode mt-4 border border-gray-200 rounded-2xl 
+        className="paymentmode border border-gray-200 rounded-2xl 
       p-2 py-0"
       >
         <div className="flex items-center py-3 border-b border-gray-200">
@@ -84,7 +84,7 @@ function ProcessOrder({ cartItems }) {
           </label>
         </div>
 
-        <div className="flex items-center py-3">
+        {/* <div className="flex items-center py-3">
           <input
             type="radio"
             id="upi"
@@ -99,7 +99,7 @@ function ProcessOrder({ cartItems }) {
           <label htmlFor="upi" className="text-sm">
             UPI Payment
           </label>
-        </div>
+        </div> */}
       </div>
     );
   }
@@ -108,16 +108,23 @@ function ProcessOrder({ cartItems }) {
     async function handlePhone(e) {
       const response = await helpers.addPhoneNumber("You Phone Number", phone);
       helpers.popUpMessage(response[0][0], response[0][1]);
+      setPhone(response[1]);
+      localStorage.setItem("kk_phone", response[1]);
+      e.target.previousSibling.innerHTML = response[1];
     }
 
     async function handleAdress(e) {
       const response = await helpers.addAddress("You Address");
       helpers.popUpMessage(response[0][0], response[0][1]);
+      setAddress(response[1]);
+      e.target.previousSibling.innerHTML = response[1];
     }
 
     async function handleName(e) {
       const response = await helpers.addName("Your Name", name);
       helpers.popUpMessage(response[0][0], response[0][1]);
+      localStorage.setItem("kk_name", response[1]);
+      e.target.previousSibling.innerHTML = response[1];
     }
 
     return (
@@ -131,8 +138,8 @@ function ProcessOrder({ cartItems }) {
             {phone ? phone : "XXXXX XXXXX"}
           </span>
           <button
-            className="text-primary underline transition-all 
-            active:text-gray-400"
+            className="text-white transition-all bg-primary rounded-md px-3 py-1 
+            active:opacity-85"
             onClick={handlePhone}
           >
             Edit
@@ -141,11 +148,11 @@ function ProcessOrder({ cartItems }) {
         <div className="address text-sm">
           <span>Adress:</span>
           <span className="w-[100px] px-3 text-gray-400">
-            {address ? address : "your adress..."}
+            {address ? address : "your address..."}
           </span>
           <button
-            className="text-primary underline transition-all 
-            active:text-gray-400"
+            className="text-white transition-all bg-primary rounded-md px-3 py-1 
+            active:opacity-85"
             onClick={handleAdress}
           >
             Edit
@@ -157,8 +164,8 @@ function ProcessOrder({ cartItems }) {
             {name ? name : "your name"}
           </span>
           <button
-            className="text-primary underline transition-all 
-            active:text-gray-400"
+            className="text-white transition-all bg-primary rounded-md px-3 py-1 
+            active:opacity-85"
             onClick={handleName}
           >
             Edit
@@ -169,12 +176,126 @@ function ProcessOrder({ cartItems }) {
   }
 
   function PlaceOrder() {
+    function validateOrder() {
+      if (phone.length < 10) {
+        setError("phone number too short");
+        return 1;
+      }
+
+      if (!/^\d{10}$/.test(phone)) {
+        setError("phone number is invalid");
+        return 1;
+      }
+
+      if (!address) {
+        setError("address is required");
+        return 1;
+      }
+
+      if (!name) {
+        setError("name is required");
+        return 1;
+      }
+
+      if (name.length < 2) {
+        setError("name is too short");
+        return 1;
+      }
+
+      return 0;
+    }
+
+    async function confirmOrder() {
+      setError("");
+      const response = await helpers.removeDialogBox("Place Order", "");
+      if (response == "removed") {
+        helpers.popUpMessage("Order Placed", "success");
+        sendOrderMessage();
+      } else helpers.popUpMessage("Cancelled", "error");
+    }
+
+    function sendOrderMessage() {
+      let food_order_items = cartItems
+        .map(
+          (e) =>
+            "\n" + JSON.stringify(`${e.name}: ₹${e.price}/-(${e.quantity})`)
+        )
+        .join("");
+      const botToken = import.meta.env.VITE_TELEGRAM_BOT_API;
+      const chatId = import.meta.env.VITE_TELEGRAM_CHATID;
+      const restaurantName = localStorage.getItem("kk_active_restaurant");
+      const location = localStorage.getItem("kk_address");
+      const location_url = localStorage.getItem("kk_location_url");
+      const phone = localStorage.getItem("kk_phone");
+
+      const totalAmount = cartItems.reduce(
+        (total, item) => total + item.price * item.quantity,
+
+        0
+      );
+
+      const message =
+        `*Name* ${name}` +
+        `📦 *New Order Received!* 📦\n\n` +
+        `🏠 *Restaurant:* ${restaurantName}\n` +
+        `🍔 *Food:* ${food_order_items}` +
+        `📞 *Phone:* ${phone}\n` +
+        `📍 *Address:* ${location}\n` +
+        `📍 *Find on Google Maps:*  ${location_url}\n` +
+        `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
+
+      const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?
+      chat_id=${chatId}&text=${encodeURIComponent(
+        message
+      )}&parse_mode=Markdown`;
+
+      fetch(telegramUrl)
+        .then((response) => response.json())
+
+        .then((data) => {
+          if (data.ok) {
+            // Clear the cart
+
+            setCartItems([]);
+            localStorage.removeItem("kk_cart_items");
+            helpers.popUpMessage("order placed", "success");
+            setTimeout(async () => {
+              await helpers.removeDialogBox(
+                "please wait for order confirmation",
+
+                "our representative will call you soon"
+              );
+            }, 500);
+
+            navigate("/restaurants");
+          } else {
+            alert("Failed to send order details. Please try again.");
+          }
+        })
+
+        .catch((error) => {
+          console.error("Error sending message:", error);
+
+          alert("An error occurred while placing the order.");
+        });
+    }
+
     return (
       <button
         className="placeorder border py-3 rounded-xl bg-primary 
-      text-white active:opacity-90 transition-all"
+      text-white active:opacity-90 transition-all relative"
+        onClick={() => {
+          const response = validateOrder();
+          if (response == 0) confirmOrder();
+        }}
       >
         Place Order
+        <span
+          className="text-xs absolute -top-[20px] left-0 text-red-400 
+        pl-1 font-semibold"
+        >
+          {error}
+        </span>
       </button>
     );
   }
@@ -182,11 +303,12 @@ function ProcessOrder({ cartItems }) {
   return (
     <div
       className="processorder w-full h-[calc(100dvh)] pt-4 flex flex-col 
-      justify-between px-4 border pb-4"
+      justify-between px-4 pb-4"
     >
       <div>
-        <h2 className="mb-3 pl-1">Items</h2>
+        <h2 className="mb-2 pl-1">Items</h2>
         <Dishes />
+        <h2 className="mb-2 pl-1 mt-5">Payment Mode</h2>
         <PaymentMode />
         <PersonalDetails />
       </div>
