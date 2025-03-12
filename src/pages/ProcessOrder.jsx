@@ -264,33 +264,35 @@ function ProcessOrder({ cartItems, setCartItems }) {
         message
       )}&parse_mode=Markdown`;
 
-      fetch(telegramUrl)
-        .then((response) => response.json())
+      console.log(telegramUrl);
 
-        .then((data) => {
-          if (data.ok) {
-            // Clear the cart
-            setCartItems([]);
-            localStorage.removeItem("kk_cart_items");
-            helpers.popUpMessage("order placed", "success");
-            setTimeout(async () => {
-              await helpers.removeDialogBox(
-                "please wait for order confirmation",
-                "our representative will call you soon"
-              );
-            }, 500);
+      // fetch(telegramUrl)
+      //   .then((response) => response.json())
 
-            navigate("/restaurants");
-          } else {
-            helpers.popUpMessage("Error", "error");
-          }
-        })
+      //   .then((data) => {
+      //     if (data.ok) {
+      //       // Clear the cart
+      //       setCartItems([]);
+      //       localStorage.removeItem("kk_cart_items");
+      //       helpers.popUpMessage("order placed", "success");
+      //       setTimeout(async () => {
+      //         await helpers.removeDialogBox(
+      //           "please wait for order confirmation",
+      //           "our representative will call you soon"
+      //         );
+      //       }, 500);
 
-        .catch((error) => {
-          console.error("Error sending message:", error);
+      //       navigate("/restaurants");
+      //     } else {
+      //       helpers.popUpMessage("Error", "error");
+      //     }
+      //   })
 
-          helpers.popUpMessage("An error occurred", "error");
-        });
+      //   .catch((error) => {
+      //     console.error("Error sending message:", error);
+
+      //     helpers.popUpMessage("An error occurred", "error");
+      //   });
     }
 
     return (
