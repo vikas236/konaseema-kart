@@ -1,22 +1,9 @@
-import React, { useEffect, useState, useTransition } from "react";
+import React, { act, useEffect, useState, useTransition } from "react";
 import server from "../core/server";
-import helpers, { popUpMessage } from "../core/helpers.js";
+import helpers from "../core/helpers.js";
 import { useNavigate } from "react-router-dom";
-
-const months = [
-  "january",
-  "february",
-  "march",
-  "april",
-  "may",
-  "june",
-  "july",
-  "august",
-  "september",
-  "october",
-  "november",
-  "december",
-];
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function Spinner({ primary_color }) {
   let bg_color, text_color;
@@ -44,6 +31,8 @@ function Spinner({ primary_color }) {
 }
 
 function Admin() {
+  const [startDate, setStartDate] = useState(new Date());
+
   const navigate = useNavigate();
   useEffect(() => {
     const admin_user = localStorage.getItem("kk_admin_user");
@@ -52,157 +41,102 @@ function Admin() {
     }
   });
 
-  const now = new Date();
-  const [activeModule, setActiveModule] = useState("2");
-  const [selectedDate, setSelectedDate] = useState([
-    now.getDate(),
-    months[now.getMonth()],
-  ]);
-  const [totalDays, setTotalDays] = useState(
-    new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate()
-  );
+  const [activeModule, setActiveModule] = useState("0");
   const panelFeatures = [
-    ["Dashboard Overview"],
+    // ["Dashboard Overview"],
     ["Order Processing", OrderProcessing],
     ["Restaurant Management", RestaurantManagement],
-    ["User Control", UserManagement],
+    // ["User Control", UserManagement],
     ["Delivery Management", DeliveryManagegment],
     ["Payment & Finance", PaymentsFinance],
     ["Promotions & Discounts", PromotionsDiscounts],
-    ["Customer Feedback", CustomerFeedback],
-    ["Notifications & Alerts", NotificationsAlerts],
-    ["Data & Analytics", DataAnalytics],
+    // ["Customer Feedback", CustomerFeedback],
+    // ["Notifications & Alerts", NotificationsAlerts],
+    // ["Data & Analytics", DataAnalytics],
   ];
   const ActiveComponent = panelFeatures[activeModule][1];
 
-  function HamMenu() {
-    function handleClick() {
-      const ham = document.querySelector(".ham");
-      const strips = document.querySelectorAll(".ham .bar");
+  function Dock() {
+    const [active, setActive] = useState(true);
 
-      ham.classList.toggle("active");
-      ham.classList.toggle("rotate-225");
-      strips[1].classList.toggle("opacity-0");
-      strips[2].classList.toggle("-rotate-270");
-      strips[2].classList.toggle("translate-y-[-8px]");
-      strips[0].classList.toggle("translate-y-[9px]");
-      strips.forEach((strip) => {
-        strip.classList.toggle("bg-white");
-        strip.classList.toggle("bg-primary");
+    useEffect(() => {
+      window.addEventListener("scroll", () => {
+        if (window.scrollY > 0) setActive(false);
+        else setActive(true);
       });
-
-      const sidebar = document.querySelector(".sidebar");
-      sidebar.classList.toggle("right-[-100%]");
-      sidebar.classList.toggle("right-0");
-    }
+    });
 
     return (
       <div
-        className={`ham w-[35px] h-[23px] rounded-xl fixed top-[35px] right-[35px] 
-          flex flex-col justify-between items-center transition-all duration-500
-           ease-in-out cursor-pointer z-10`}
-        onClick={handleClick}
+        className={`dock w-[65px] ease-in-out py-1 flex-col fixed 
+          top-1/2 flex justify-around items-center bg-primary z-5 
+          text-white text-4xl rounded-4xl -translate-y-1/2 
+          ${active ? "right-[15px]" : "-right-[100px]"} transition-all 
+          duration-650`}
       >
-        <div className="bar w-full h-[5px] bg-white rounded-xl transition-all"></div>
-        <div className="bar w-full h-[5px] bg-white rounded-xl transition-all"></div>
-        <div className="bar w-full h-[5px] bg-white rounded-xl transition-all"></div>
-      </div>
-    );
-  }
-
-  function SideBar() {
-    return (
-      <div
-        className={`sidebar w-dvw h-dvh shadow-xl bg-white transition-all  
-          ease-in-out fixed top-0 right-[-100%] flex flex-col justify-between 
-          items-center border border-gray-400 px-5 py-5 gap-2 overflow-scroll 
-          z-5 pt-[80px] duration-1000`}
-      >
-        {panelFeatures.map((feature, index) => (
-          <span
-            key={index}
-            className="w-full border rounded-lg text-center py-2 px-3 cursor-pointer"
-            onClick={() => setActiveModule(index)}
-          >
-            {feature[0]}
-          </span>
-        ))}
+        <button
+          className={`rounded-full p-3 py-2 ${
+            activeModule == 0 && "bg-white"
+          } ${activeModule == 0 && "text-primary"} 
+            transition-all`}
+          onClick={() => setActiveModule(0)}
+        >
+          <i className="bx bxs-package"></i>
+        </button>
+        <button
+          className={`rounded-full p-3 py-2 ${
+            activeModule == 1 && "bg-white"
+          } ${activeModule == 1 && "text-primary"} 
+            transition-all`}
+          onClick={() => setActiveModule(1)}
+        >
+          <i className="bx bx-bowl-hot"></i>
+        </button>
+        <button
+          onClick={() => setActive(!active)}
+          className={`close_dock w-[60px] h-[60px] bg-white 
+            rounded-full absolute bottom-[-65px] active:bg-red-400 
+            text-red-400 shadow-lg border border-gray-200 
+            active:text-white active:border-red-400 close_dock
+            ${
+              !active
+                ? "right-[75px] rotate-[180deg] text-primary"
+                : "right-[0] "
+            } transition-all
+            `}
+        >
+          <i className="bx bx-chevron-right"></i>
+        </button>
       </div>
     );
   }
 
   function MonthPicker() {
-    function handleChange(e) {
-      setSelectedDate([1, e.target.value]);
-      setTotalDays(
-        new Date(
-          new Date().getFullYear(),
-          months.indexOf(selectedDate[1]),
-          0
-        ).getDate()
-      );
-    }
-
     return (
-      <div className="date_picker w-full bg-primary text-white rounded-b-3xl pt-[100px] pb-[35px] px-4 flex justify-between">
-        <select
-          name="month_picker"
-          id="month_picker"
-          className="text-2xl p-0 w-[calc(fit-content + 200px)] rounded-md"
-          defaultValue={selectedDate[1]}
-          onChange={handleChange}
+      <div
+        className={`date_picker h-[85px] bg-primary text-white rounded-b-3xl px-4
+          relative`}
+      >
+        <div
+          className={`border border-white rounded-lg p-2 flex w-fit absolute left-1/2 
+            top-1/2 -translate-1/2 items-center justify-between cursor-pointer`}
         >
-          {months.map((month, index) => {
-            return (
-              <option
-                value={month}
-                key={index}
-                className="bg-white shadow-2xl text-black"
-              >
-                {month[0].toUpperCase() + month.slice(1)}
-              </option>
-            );
-          })}
-        </select>
-        <select
-          className="day_picker px-3 bg-white rounded-full text-primary"
-          defaultValue={selectedDate[0]}
-          onChange={(e) =>
-            setSelectedDate([parseInt(e.target.value), selectedDate[1]])
-          }
-        >
-          {Array.from({ length: totalDays }, (_, index) => {
-            return (
-              <option key={index} className="text-black border text-center">
-                {index + 1}
-              </option>
-            );
-          })}
-        </select>
+          <DatePicker
+            selected={startDate}
+            onChange={(date) => setStartDate(date)}
+            className="w-[150px]"
+          />
+          <button className="absolute right-[5px]">
+            <i className="bx bxs-calendar-edit text-3xl"></i>
+          </button>
+        </div>
       </div>
     );
   }
 
   function UserManagement() {
     return (
-      <div className="user_management w-full min-h-[calc(100dvh-90px)]">
-        <div className="date">
-          <select name="month" id="month_picker">
-            <option value="january">january</option>
-            <option value="february">february</option>
-            <option value="march">march</option>
-            <option value="april">april</option>
-            <option value="may">may</option>
-            <option value="june">june</option>
-            <option value="july">july</option>
-            <option value="august">august</option>
-            <option value="september">september</option>
-            <option value="october">october</option>
-            <option value="november">november</option>
-            <option value="december">december</option>
-          </select>
-        </div>
-      </div>
+      <div className="user_management w-full min-h-[calc(100dvh-90px)]"></div>
     );
   }
 
@@ -682,7 +616,7 @@ function Admin() {
     }
 
     return (
-      <div className="restaurant_management w-full min-h-[calc(100dvh-90px)]">
+      <div className="restaurant_management w-full min-h-[calc(100dvh-90px)] mb-[70px]">
         <RestaurantSelection />
         <Dishes />
       </div>
@@ -723,8 +657,7 @@ function Admin() {
 
   return (
     <div className="admin h-full flex flex-col items-center">
-      <HamMenu />
-      <SideBar />
+      <Dock />
       <ActiveComponent />
     </div>
   );

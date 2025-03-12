@@ -24,6 +24,7 @@ const Dock = ({ cartItems, redirectCart = "/cart" }) => {
     "/auth",
     "/payment",
     "/admin_auth",
+    "/processorder",
   ];
 
   const links = [

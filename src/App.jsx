@@ -20,6 +20,7 @@ import Auth from "./pages/Auth.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import Payment from "./pages/Payment.jsx";
 import AdminAuth from "./pages/AdminAuth.jsx";
+import ProcessOrder from "./pages/ProcessOrder.jsx";
 
 function App() {
   const location = useLocation();
@@ -32,7 +33,11 @@ function App() {
   useEffect(() => {
     const root = document.querySelector("#root");
     const app = document.querySelector(".app");
-    if (location.pathname === "/admin" || location.pathname === "/admin_auth") {
+    if (
+      location.pathname === "/admin" ||
+      location.pathname === "/admin_auth" ||
+      location.pathname === "/processorder"
+    ) {
       root.classList.remove("pb-[70px]");
       root.classList.remove("px-5");
       app.classList.remove("py-3");
@@ -69,6 +74,10 @@ function App() {
         <Route
           path="/admin"
           element={<Admin cartItems={cartItems} setCartItems={setCartItems} />}
+        />
+        <Route
+          path="/processorder"
+          element={<ProcessOrder cartItems={cartItems} />}
         />
         <Route path="/auth" element={<Auth />} />
         <Route path="/admin_auth" element={<AdminAuth />} />
