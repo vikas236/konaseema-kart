@@ -269,14 +269,14 @@ function ProcessOrder({ cartItems }) {
 
             navigate("/restaurants");
           } else {
-            alert("Failed to send order details. Please try again.");
+            helpers.popUpMessage("Error");
           }
         })
 
         .catch((error) => {
           console.error("Error sending message:", error);
 
-          alert("An error occurred while placing the order.");
+          helpers.popUpMessage("An error occurred");
         });
     }
 
