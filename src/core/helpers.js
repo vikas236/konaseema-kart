@@ -41,7 +41,7 @@ export async function addDialogBox(question) {
     });
 
     const dialog = Object.assign(document.createElement("div"), {
-      className: `fixed top-[50%] left-[50%] -translate-x-[50%] -translate-y-[50%] 
+      className: `fixed top-[50px] left-[50%] -translate-x-[50%] 
         rounded-3xl w-[calc(100dvw-50px)] h-fit bg-white flex items-center gap-3 
         justify-center z-50 shadow-md border border-gray-300 min-h-[200px] p-4
         flex-col`,
@@ -59,6 +59,10 @@ export async function addDialogBox(question) {
         <button class="bg-primary text-white rounded-xl px-4 py-2 text-xl"><i class="bx bx-check"></i></button>
       </div>
     `;
+
+    setTimeout(() => {
+      dialog.querySelector("input").focus();
+    }, 50);
 
     document.body.append(backgroundOverlay, dialog);
 
@@ -325,6 +329,250 @@ export const fileToBase64 = (file) => {
   });
 };
 
+export async function addPhoneNumber(question, value) {
+  return new Promise((resolve) => {
+    // Create dialog and overlay
+    const backgroundOverlay = Object.assign(document.createElement("div"), {
+      className: "fixed top-0 left-0 w-dvw h-dvh bg-black opacity-25 z-40",
+      onclick: () => closeDialog("", "fail"),
+    });
+
+    const dialog = Object.assign(document.createElement("div"), {
+      className: `fixed top-[50px] left-[50%] -translate-x-[50%] 
+        rounded-3xl w-[calc(100dvw-50px)] h-fit bg-white flex items-center gap-3 
+        justify-center z-50 shadow-md border border-gray-300 min-h-[200px] p-4
+        flex-col`,
+    });
+
+    // Create content
+    dialog.innerHTML = `
+      <div class="w-full flex flex-col justify-center items-center p-2">
+        <h1 class="text-lg font-semibold w-full mt-2">${question}:</h1>
+        <input type="text" class="w-full p-2 border border-gray-300 rounded-md mt-4 
+        outline-none focus:outline-black" placeholder="Phone Number" autofocus 
+        maxLength="10" />
+      </div>
+      <div class="w-full flex justify-between p-2">
+        <button class="bg-red-400 text-white rounded-xl px-4 py-2">Cancel</button>
+        <button class="bg-primary text-white rounded-xl px-4 py-2 text-xl"><i class="bx bx-check"></i></button>
+      </div>
+    `;
+
+    dialog.querySelector("input").defaultValue = value;
+    setTimeout(() => {
+      dialog.querySelector("input").focus();
+    }, 50);
+
+    document.body.append(backgroundOverlay, dialog);
+
+    function closeDialog(string, type) {
+      let params;
+
+      dialog.remove();
+      backgroundOverlay.remove();
+
+      if (type == "success" && string) params = ["Success", "success"];
+      else if (type == "fail") params = ["Cancelled", "error"];
+      else params = ["It's Empty", ""];
+
+      resolve([params, string]); // Resolve the promise with the input value
+    }
+
+    dialog.childNodes[3].childNodes[1].addEventListener("click", () =>
+      closeDialog("", "fail")
+    );
+
+    dialog.childNodes[3].childNodes[3].addEventListener("click", () => {
+      closeDialog(dialog.querySelector("input").value, "success");
+    });
+  });
+}
+
+export async function addAddress(question) {
+  let address;
+
+  async function getLocation() {
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const longitude = position.coords.longitude;
+          const latitude = position.coords.latitude;
+          const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`;
+
+          fetch(url)
+            .then((response) => response.json())
+            .then((data) => {
+              if (data.display_name) {
+                const address = data.display_name;
+                popUpMessage("Address found", "success");
+                localStorage.setItem("kk_address", address);
+                localStorage.setItem(
+                  "kk_location_url",
+                  `https://www.google.com/maps?q=${longitude},${latitude}`
+                );
+                resolve(address);
+              } else {
+                popUpMessage("No address found", "error");
+                resolve("");
+              }
+            })
+            .catch((error) => {
+              console.error(error);
+              popUpMessage("Error occurred while fetching address", "error");
+              resolve("");
+            });
+        },
+        (error) => {
+          console.error(error);
+          popUpMessage("Geolocation error", "error");
+          resolve("");
+        }
+      );
+    });
+  }
+
+  async function addLocation(e, p) {
+    if (e.target.innerHTML != "Loading..." && p.innerHTML != "Loading...") {
+      e.target.innerHTML = `
+        <div class="w-[27px] h-[27px]">
+          <div class="w-full h-full relative overflow-hidden rounded-full 
+          animate-spin">
+            <span class="w-[60%] h-full absolute top-1/2 left-1/2 bg-white 
+              z-10"></span>
+            <span class="w-full h-full absolute left-0 rounded-full opacity-25 
+            bg-white z-10"></span>
+            <span class="w-[75%] h-[75%] absolute top-1/2 left-1/2 -translate-1/2 
+            bg-primary rounded-full z-30"></span>
+          </div>
+        </div>`;
+      p.innerHTML = "Loading...";
+      const result = await getLocation();
+      p.innerHTML = result;
+      e.target.innerHTML = "Detect Location";
+    }
+  }
+
+  return new Promise((resolve) => {
+    // Create dialog and overlay
+    const backgroundOverlay = Object.assign(document.createElement("div"), {
+      className: "fixed top-0 left-0 w-dvw h-dvh bg-black opacity-25 z-40",
+      onclick: () => closeDialog("", "fail"),
+    });
+
+    const dialog = Object.assign(document.createElement("div"), {
+      className: `fixed top-[50px] left-[50%] -translate-x-[50%] 
+        rounded-3xl w-[calc(100dvw-50px)] h-fit bg-white flex items-center gap-3 
+        justify-center z-50 shadow-md border border-gray-300 min-h-[200px] p-4
+        flex-col`,
+    });
+
+    // Create content
+    dialog.innerHTML = `
+      <div class="w-full flex flex-col justify-center p-2 relative">
+        <h1 class="text-lg font-semibold w-full mt-2">${question}:</h1>
+        <p class="address w-full h-fit overflow-hidden border border-gray-300 
+        rounded-lg py-1 mt-5 pl-2 text-gray-400">Your Location</p>
+        <button class="detect bg-primary px-2 py-2 text-white rounded-xl 
+        text-lg mt-5 flex justify-center items-center">Detect</button>
+      </div>
+      <div class="w-full flex justify-between p-2">
+        <button class="bg-red-400 text-white rounded-xl px-4 py-2">Cancel
+        </button>
+        <button class="bg-primary text-white rounded-xl px-4 py-2 text-xl">
+        <i class="bx bx-check"></i></button>
+      </div>
+    `;
+
+    dialog
+      .querySelector(".detect")
+      .addEventListener("click", (e) =>
+        addLocation(e, dialog.querySelector(".address"))
+      );
+
+    document.body.append(backgroundOverlay, dialog);
+
+    function closeDialog(string, type) {
+      let params;
+
+      dialog.remove();
+      backgroundOverlay.remove();
+
+      if (type == "success" && string) params = ["Success", "success"];
+      else if (type == "fail") params = ["Cancelled", "error"];
+      else params = ["It's Empty", ""];
+
+      resolve([params, string]); // Resolve the promise with the input value
+    }
+
+    dialog.childNodes[3].childNodes[1].addEventListener("click", () =>
+      closeDialog("", "fail")
+    );
+
+    dialog.childNodes[3].childNodes[3].addEventListener("click", () => {
+      closeDialog(dialog.querySelector(".address").innerHTML, "success");
+    });
+  });
+}
+
+export async function addName(question, value) {
+  return new Promise((resolve) => {
+    // Create dialog and overlay
+    const backgroundOverlay = Object.assign(document.createElement("div"), {
+      className: "fixed top-0 left-0 w-dvw h-dvh bg-black opacity-25 z-40",
+      onclick: () => closeDialog("", "fail"),
+    });
+
+    const dialog = Object.assign(document.createElement("div"), {
+      className: `fixed top-[50px] left-[50%] -translate-x-[50%] 
+        rounded-3xl w-[calc(100dvw-50px)] h-fit bg-white flex items-center gap-3 
+        justify-center z-50 shadow-md border border-gray-300 min-h-[200px] p-4
+        flex-col`,
+    });
+
+    // Create content
+    dialog.innerHTML = `
+      <div class="w-full flex flex-col justify-center items-center p-2">
+        <h1 class="text-lg font-semibold w-full mt-2">${question}:</h1>
+        <input type="text" class="w-full p-2 border border-gray-300 rounded-md mt-4 
+        outline-none focus:outline-black" placeholder="Enter Name" autofocus 
+        defaultValue=${value} />
+      </div>
+      <div class="w-full flex justify-between p-2">
+        <button class="bg-red-400 text-white rounded-xl px-4 py-2">Cancel</button>
+        <button class="bg-primary text-white rounded-xl px-4 py-2 text-xl"><i class="bx bx-check"></i></button>
+      </div>
+    `;
+
+    dialog.querySelector("input").defaultValue = value ? value : "";
+    setTimeout(() => {
+      dialog.querySelector("input").focus();
+    }, 50);
+
+    document.body.append(backgroundOverlay, dialog);
+
+    function closeDialog(string, type) {
+      let params;
+
+      dialog.remove();
+      backgroundOverlay.remove();
+
+      if (type == "success" && string) params = ["Success", "success"];
+      else if (type == "fail") params = ["Cancelled", "error"];
+      else params = ["It's Empty", ""];
+
+      resolve([params, string]); // Resolve the promise with the input value
+    }
+
+    dialog.childNodes[3].childNodes[1].addEventListener("click", () =>
+      closeDialog("", "fail")
+    );
+
+    dialog.childNodes[3].childNodes[3].addEventListener("click", () => {
+      closeDialog(dialog.querySelector("input").value, "success");
+    });
+  });
+}
+
 export default {
   popUpMessage,
   camelCasing,
@@ -333,6 +581,7 @@ export default {
   addImageDialogBox,
   fileToBase64,
   addNewDishDialogBox,
-  // Spinner,
-  // SpinnerWhite,
+  addPhoneNumber,
+  addAddress,
+  addName,
 };

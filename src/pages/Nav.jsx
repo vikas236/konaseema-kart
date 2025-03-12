@@ -1,8 +1,16 @@
 import { useLocation } from "react-router-dom";
 import { NavLink } from "react-router-dom";
+import logo from "../assets/kk_logo.png";
 
 function Nav({ cartItems, setCartItems }) {
-  const disallowed_pathnames = ["/cart", "/admin", "/payment", "/admin_auth"];
+  const disallowed_pathnames = [
+    "/cart",
+    "/admin",
+    "/payment",
+    "/admin_auth",
+    "/auth",
+    "/processorder",
+  ];
   const location = useLocation();
 
   const CartIcon = () => {
@@ -21,10 +29,10 @@ function Nav({ cartItems, setCartItems }) {
 
   return (
     !disallowed_pathnames.includes(location.pathname) && (
-      <nav className="w-full pt-5 pb-8 flex items-center justify-between">
-        <a className="font-bold text-3xl" href="/">
-          Konaseema Kart
-        </a>
+      <nav className="w-full pt-5 pb-3 flex items-center justify-between">
+        <NavLink to="/">
+          <img src={logo} alt="konaseema kart logo" className="max-w-[150px]" />
+        </NavLink>
         <CartIcon />
       </nav>
     )

@@ -1,7 +1,7 @@
 import React, { act, useEffect, useState } from "react";
 import Slider from "react-slick";
 import server from "../core/server.js";
-import { useActionState } from "react";
+import delete_icon from "../assets/delete_icon.svg";
 
 function Spinner({ primary_color }) {
   let bg_color, text_color;
@@ -75,31 +75,31 @@ const Carousel = ({ carouselSettings, cartItems, setCartItems }) => {
       }
     }
 
-    function decreaseQuantity() {
-      if (item) {
-        if (item.quantity === 1) {
-          removeItem(); // Remove if quantity is 1
-        } else {
-          const updatedCart = cartItems.map((e) =>
-            e.name === dish_name ? { ...e, quantity: e.quantity - 1 } : e
-          );
-          setCartItems(updatedCart);
-          setItemQuantity((prev) => prev - 1);
-          localStorage.setItem("kk_cart_items", JSON.stringify(updatedCart));
-        }
-      }
-    }
+    // function decreaseQuantity() {
+    //   if (item) {
+    //     if (item.quantity === 1) {
+    //       removeItem(); // Remove if quantity is 1
+    //     } else {
+    //       const updatedCart = cartItems.map((e) =>
+    //         e.name === dish_name ? { ...e, quantity: e.quantity - 1 } : e
+    //       );
+    //       setCartItems(updatedCart);
+    //       setItemQuantity((prev) => prev - 1);
+    //       localStorage.setItem("kk_cart_items", JSON.stringify(updatedCart));
+    //     }
+    //   }
+    // }
 
-    function increaseQuantity() {
-      if (item) {
-        const updatedCart = cartItems.map((e) =>
-          e.name === dish_name ? { ...e, quantity: e.quantity + 1 } : e
-        );
-        setCartItems(updatedCart);
-        setItemQuantity((prev) => prev + 1);
-        localStorage.setItem("kk_cart_items", JSON.stringify(updatedCart));
-      }
-    }
+    // function increaseQuantity() {
+    //   if (item) {
+    //     const updatedCart = cartItems.map((e) =>
+    //       e.name === dish_name ? { ...e, quantity: e.quantity + 1 } : e
+    //     );
+    //     setCartItems(updatedCart);
+    //     setItemQuantity((prev) => prev + 1);
+    //     localStorage.setItem("kk_cart_items", JSON.stringify(updatedCart));
+    //   }
+    // }
 
     function removeItem() {
       const updatedCart = cartItems.filter((e) => e.name !== dish_name);
@@ -110,26 +110,10 @@ const Carousel = ({ carouselSettings, cartItems, setCartItems }) => {
     return item ? (
       <div className="flex gap-2 items-center">
         <button
-          className="bg-red-500 px-3 rounded-md text-white text-lg ml-2 transition-all cursor-pointer"
-          onClick={removeItem}
+          className="w-[35px] h-[35px] bg-red-400 rounded-md transition-all cursor-pointer p-1 
+        active:bg-red-500"
         >
-          Remove
-        </button>
-        <button
-          className="bg-gray-200 px-2 my-1 rounded-md text-xl active:bg-transparent transition-all cursor-pointer"
-          onClick={decreaseQuantity}
-        >
-          -
-        </button>
-        <span className="w-[25px] text-center bg-white px-2 rounded-md">
-          {itemQuantity}
-        </span>
-        <button
-          className="bg-[#307a59] px-2 rounded-md text-xl text-white active:bg-transparent active:text-[#307a59] 
-          transition-all cursor-pointer"
-          onClick={increaseQuantity}
-        >
-          +
+          <img src={delete_icon} className="" onClick={removeItem} />
         </button>
       </div>
     ) : (
@@ -209,11 +193,35 @@ const Carousel = ({ carouselSettings, cartItems, setCartItems }) => {
 
               return (
                 <div className="dish w-full" key={e.dish_name}>
-                  <div className="dish_name p-5 bg-gray-100 mb-2 border border-gray-200 rounded-xl">
-                    <h2 className="dish_name">{e.dish_name}</h2>
-                    <div className="dish_price text-[#307a59] flex items-center justify-between mt-5">
-                      <span>₹{price}/-</span>
-                      <CartIcon dish_name={e.dish_name} dish_price={price} />
+                  <div
+                    className="dish_name p-2 bg-gray-100 mb-2 border border-gray-200 rounded-xl 
+                  flex relative"
+                  >
+                    {e.image ? (
+                      <img
+                        src={e.image}
+                        alt="dish image"
+                        className="h-[125px] w-[125px] border border-gray-300 rounded-2xl mr-4 object-contain"
+                      />
+                    ) : (
+                      <div
+                        className="h-[125px] w-[125px] flex items-center justify-center border border-gray-300 
+                      rounded-2xl mr-4"
+                      >
+                        <i className="bx bx-bowl-hot text-6xl text-gray-300"></i>
+                      </div>
+                    )}
+                    <div className="pt-1 flex flex-col justify-between">
+                      <h2 className="dish_name">{e.dish_name}</h2>
+                      <div className="dish_price text-[#307a59] flex items-center justify-between mb-4">
+                        <span>₹{price}/-</span>
+                        <div className="cart absolute right-5 bottom-5">
+                          <CartIcon
+                            dish_name={e.dish_name}
+                            dish_price={price}
+                          />
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
