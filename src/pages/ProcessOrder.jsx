@@ -271,7 +271,7 @@ function ProcessOrder({ cartItems, setCartItems }) {
                 "please wait for order confirmation",
                 "our representative will call you soon"
               );
-            }, 500);
+            }, 200);
 
             navigate("/restaurants");
           } else {
