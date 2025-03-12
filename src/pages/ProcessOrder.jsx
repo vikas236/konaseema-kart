@@ -206,12 +206,22 @@ function ProcessOrder({ cartItems, setCartItems }) {
     }
 
     async function confirmOrder() {
-      setError("");
-      const response = await helpers.removeDialogBox("Place Order", "");
-      if (response == "removed") {
-        helpers.popUpMessage("Order Placed", "success");
-        sendOrderMessage();
-      } else helpers.popUpMessage("Cancelled", "error");
+      const totalAmount = cartItems.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      );
+
+      if (totalAmount >= 100) {
+        setError("");
+        const response = await helpers.removeDialogBox("Place Order", "");
+        if (response == "removed") {
+          helpers.popUpMessage("Order Placed", "success");
+          sendOrderMessage();
+        } else helpers.popUpMessage("Cancelled", "error");
+      } else {
+        setError("Minimum Order Value: 100 rupees");
+        helpers.popUpMessage("Minimum Order Value: 100 rupees", "error");
+      }
     }
 
     async function sendOrderMessage() {
@@ -219,22 +229,6 @@ function ProcessOrder({ cartItems, setCartItems }) {
         (total, item) => total + item.price * item.quantity,
         0
       );
-
-      if (totalAmount >= 100) {
-        if (phone[0] && address[0]) {
-          if (!loading) {
-            setLoading(true);
-            const response = await helpers.removeDialogBox("Place order", "");
-            if (response == "removed") {
-              proceedToCheckout();
-            } else helpers.popUpMessage("cancelled", "error");
-            setLoading(false);
-          }
-        } else navigate("/auth");
-      } else {
-        setError("order should be above 100 rupees");
-        helpers.popUpMessage("order should be above 100 rupees", "error");
-      }
 
       let food_order_items = cartItems
         .map(
@@ -259,40 +253,37 @@ function ProcessOrder({ cartItems, setCartItems }) {
         `📍 *Find on Google Maps:*  ${location_url}\n` +
         `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
 
-      const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?
-      chat_id=${chatId}&text=${encodeURIComponent(
+      const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
         message
       )}&parse_mode=Markdown`;
 
-      console.log(telegramUrl);
+      fetch(telegramUrl)
+        .then((response) => response.json())
 
-      // fetch(telegramUrl)
-      //   .then((response) => response.json())
+        .then((data) => {
+          if (data.ok) {
+            // Clear the cart
+            setCartItems([]);
+            localStorage.removeItem("kk_cart_items");
+            helpers.popUpMessage("order placed", "success");
+            setTimeout(async () => {
+              await helpers.removeDialogBox(
+                "please wait for order confirmation",
+                "our representative will call you soon"
+              );
+            }, 500);
 
-      //   .then((data) => {
-      //     if (data.ok) {
-      //       // Clear the cart
-      //       setCartItems([]);
-      //       localStorage.removeItem("kk_cart_items");
-      //       helpers.popUpMessage("order placed", "success");
-      //       setTimeout(async () => {
-      //         await helpers.removeDialogBox(
-      //           "please wait for order confirmation",
-      //           "our representative will call you soon"
-      //         );
-      //       }, 500);
+            navigate("/restaurants");
+          } else {
+            helpers.popUpMessage("Error", "error");
+          }
+        })
 
-      //       navigate("/restaurants");
-      //     } else {
-      //       helpers.popUpMessage("Error", "error");
-      //     }
-      //   })
+        .catch((error) => {
+          console.error("Error sending message:", error);
 
-      //   .catch((error) => {
-      //     console.error("Error sending message:", error);
-
-      //     helpers.popUpMessage("An error occurred", "error");
-      //   });
+          helpers.popUpMessage("An error occurred", "error");
+        });
     }
 
     return (
@@ -300,8 +291,8 @@ function ProcessOrder({ cartItems, setCartItems }) {
         className="placeorder border py-3 rounded-xl bg-primary 
       text-white active:opacity-90 transition-all relative"
         onClick={() => {
-          const response = validateOrder();
-          if (response == 0) confirmOrder();
+          validateOrder();
+          if (error == undefined || !error.length) confirmOrder();
         }}
       >
         Place Order
