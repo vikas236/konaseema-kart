@@ -179,7 +179,7 @@ function ProcessOrder({ cartItems, setCartItems }) {
   function PlaceOrder() {
     function validateOrder() {
       if (!phone.length) {
-        helpers.popUpMessage('"phone number is required', "error");
+        helpers.popUpMessage("phone number is required", "error");
         setError("phone number is required");
         return 1;
       }
