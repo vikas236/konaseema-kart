@@ -390,6 +390,7 @@ export async function addPhoneNumber(question, value) {
 
 export async function addAddress(question) {
   let address;
+  let loading = false;
 
   async function getLocation() {
     return new Promise((resolve) => {
@@ -432,6 +433,7 @@ export async function addAddress(question) {
   }
 
   async function addLocation(e, p) {
+    loading = true;
     if (e.target.innerHTML != "Loading..." && p.innerHTML != "Loading...") {
       e.target.innerHTML = `
         <div class="w-[27px] h-[27px]">
@@ -450,6 +452,7 @@ export async function addAddress(question) {
       p.innerHTML = result;
       e.target.innerHTML = "Detect Location";
     }
+    loading = false;
   }
 
   return new Promise((resolve) => {
@@ -504,12 +507,14 @@ export async function addAddress(question) {
       resolve([params, string]); // Resolve the promise with the input value
     }
 
-    dialog.childNodes[3].childNodes[1].addEventListener("click", () =>
-      closeDialog("", "fail")
-    );
+    dialog.childNodes[3].childNodes[1].addEventListener("click", () => {
+      closeDialog("", "fail");
+    });
 
     dialog.childNodes[3].childNodes[3].addEventListener("click", () => {
-      closeDialog(dialog.querySelector(".address").innerHTML, "success");
+      if (!loading)
+        closeDialog(dialog.querySelector(".address").innerHTML, "success");
+      else popUpMessage("Please Wait", "");
     });
   });
 }
