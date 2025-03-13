@@ -257,7 +257,7 @@ function ProcessOrder({ cartItems, setCartItems }) {
 
       const message =
         `📦 *New Order Received!* 📦\n\n` +
-        `*Name* ${name}` +
+        `*Name:* ${name}` +
         `🏠 *Restaurant:* ${restaurantName}\n` +
         `🍔 *Food:* ${food_order_items}` +
         `📞 *Phone:* ${phone}\n` +
