@@ -124,6 +124,7 @@ function ProcessOrder({ cartItems, setCartItems }) {
       const response = await helpers.addName("Your Name", name);
       helpers.popUpMessage(response[0][0], response[0][1]);
       localStorage.setItem("kk_name", response[1]);
+      setName(response[1]);
       e.target.previousSibling.innerHTML = response[1];
     }
 
@@ -177,6 +178,11 @@ function ProcessOrder({ cartItems, setCartItems }) {
 
   function PlaceOrder() {
     function validateOrder() {
+      if (!phone.length) {
+        setError("phone number is required");
+        return 1;
+      }
+
       if (phone.length < 10) {
         setError("phone number too short");
         return 1;
@@ -187,7 +193,7 @@ function ProcessOrder({ cartItems, setCartItems }) {
         return 1;
       }
 
-      if (!address) {
+      if (!address.length || address === "Your Location") {
         setError("address is required");
         return 1;
       }
@@ -291,8 +297,8 @@ function ProcessOrder({ cartItems, setCartItems }) {
         className="placeorder border py-3 rounded-xl bg-primary 
       text-white active:opacity-90 transition-all relative"
         onClick={() => {
-          validateOrder();
-          if (error == undefined || !error.length) confirmOrder();
+          const response = validateOrder();
+          if (response == 0) confirmOrder();
         }}
       >
         Place Order
