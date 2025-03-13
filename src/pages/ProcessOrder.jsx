@@ -179,31 +179,37 @@ function ProcessOrder({ cartItems, setCartItems }) {
   function PlaceOrder() {
     function validateOrder() {
       if (!phone.length) {
+        helpers.popUpMessage('("phone number is required', "error");
         setError("phone number is required");
         return 1;
       }
 
       if (phone.length < 10) {
+        helpers.popUpMessage("phone number too short", "error");
         setError("phone number too short");
         return 1;
       }
 
       if (!/^\d{10}$/.test(phone)) {
+        helpers.popUpMessage("phone number is invalid", "error");
         setError("phone number is invalid");
         return 1;
       }
 
       if (!address.length || address === "Your Location") {
+        helpers.popUpMessage("address is required", "error");
         setError("address is required");
         return 1;
       }
 
       if (!name) {
+        helpers.popUpMessage("name is required", "error");
         setError("name is required");
         return 1;
       }
 
       if (name.length < 2) {
+        helpers.popUpMessage("name is too short", "error");
         setError("name is too short");
         return 1;
       }
