@@ -256,8 +256,8 @@ function ProcessOrder({ cartItems, setCartItems }) {
       const phone = localStorage.getItem("kk_phone");
 
       const message =
-        `*Name* ${name}` +
         `📦 *New Order Received!* 📦\n\n` +
+        `*Name* ${name}` +
         `🏠 *Restaurant:* ${restaurantName}\n` +
         `🍔 *Food:* ${food_order_items}` +
         `📞 *Phone:* ${phone}\n` +
