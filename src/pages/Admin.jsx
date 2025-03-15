@@ -384,7 +384,7 @@ function Admin() {
       return (
         <div
           className="orders flex flex-col items-center mt-3 relative 
-        h-[calc(100vh-200px)] gap-2 pb-24"
+        min-h-[calc(100vh-200px)] gap-2 pb-24"
         >
           {loading ? (
             <div
@@ -494,8 +494,8 @@ function Admin() {
 
     return (
       <div
-        className="order_processing w-full min-h-[calc(100dvh-90px)] 
-      h-fit pb-[300px]"
+        className="order_processing w-full pb-[25px] overflow-hidden 
+      "
       >
         <MonthPicker />
         <button
@@ -1022,7 +1022,7 @@ function Admin() {
   }
 
   return (
-    <div className="admin h-full flex flex-col items-center">
+    <div className="admin flex flex-col items-center">
       <Dock />
       <ActiveComponent />
     </div>

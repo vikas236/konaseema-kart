@@ -28,17 +28,20 @@ function Spinner({ primary_color }) {
 }
 
 function Order() {
-  const phone = localStorage.getItem("kk_phone");
+  const phone = localStorage.getItem("kk_phone")
+    ? localStorage.getItem("kk_phone")
+    : "";
   const [prevOrders, setPrevOrders] = useState([]);
   const [loading, setLoading] = useState(false);
 
+  async function getOrders() {
+    setLoading(true);
+    const orders = await server.getUserOrders(phone);
+    setPrevOrders(orders);
+    setLoading(false);
+  }
+
   useEffect(() => {
-    async function getOrders() {
-      setLoading(true);
-      const orders = await server.getUserOrders(phone);
-      setPrevOrders(orders);
-      setLoading(false);
-    }
     getOrders();
   }, []);
 

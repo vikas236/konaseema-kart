@@ -317,7 +317,7 @@ function ProcessOrder({ cartItems, setCartItems }) {
       const message =
         `📢 *New Order Received!* 🚀\n\n` +
         `🛒 *Order Details:* \n` +
-        `🔗 *[👉 View Order Dashboard 👈] \n` +
+        `🔗 *[👉 View Orders👈] \n` +
         `(https://www.konaseemakart.in/admin)* \n`;
 
       const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
