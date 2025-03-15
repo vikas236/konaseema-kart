@@ -1,6 +1,6 @@
 const dev_url = "http://localhost:3000";
 const prod_url = "https://kk-server.vercel.app";
-const server_url = dev_url;
+const server_url = prod_url;
 
 async function SearchForTerm(search_term) {
   return 0;
