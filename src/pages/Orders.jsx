@@ -110,7 +110,7 @@ function Order() {
   return (
     <div
       className="orders flex flex-col items-center relative 
-    h-[calc(100vh-200px)] gap-2"
+    min-h-[calc(100vh-200px)] gap-2 pb-5"
     >
       <h2 className="font-semibold mb-3">Orders</h2>
       {loading ? (
