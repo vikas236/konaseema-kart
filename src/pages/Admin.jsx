@@ -279,7 +279,7 @@ function Admin() {
                   Order No: {data.id}
                 </span>
                 <span
-                  className="text-xs text-gray-400 max-w-[100px] 
+                  className="text-xs text-gray-400 w-[250px] 
                 absolute left-1/2 top-[8px] -translate-x-1/2"
                 >
                   Username: {data.name}
