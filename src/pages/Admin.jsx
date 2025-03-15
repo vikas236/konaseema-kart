@@ -270,6 +270,12 @@ function Admin() {
                 <span className="block text-xs text-gray-400">
                   Order No: {data.id}
                 </span>
+                <span
+                  className="text-xs text-gray-400 max-w-[100px] 
+                absolute left-1/2 top-[8px] -translate-x-1/2"
+                >
+                  Username: {data.name}
+                </span>
                 <h2 className="w-full text-md font-semibold">
                   {data.restaurant_name}
                 </h2>
