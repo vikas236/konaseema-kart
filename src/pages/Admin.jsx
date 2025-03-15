@@ -1,4 +1,4 @@
-import React, { act, useEffect, useState, useTransition } from "react";
+import React, { act, useEffect, useState } from "react";
 import server from "../core/server";
 import helpers from "../core/helpers.js";
 import { useNavigate } from "react-router-dom";
@@ -31,7 +31,8 @@ function Spinner({ primary_color }) {
 }
 
 function Admin() {
-  const [startDate, setStartDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date());
+  const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -41,7 +42,11 @@ function Admin() {
     }
   });
 
-  const [activeModule, setActiveModule] = useState("0");
+  const [activeModule, setActiveModule] = useState(
+    localStorage.getItem("kk_admin_active_module")
+      ? localStorage.getItem("kk_admin_active_module")
+      : "0"
+  );
   const panelFeatures = [
     // ["Dashboard Overview"],
     ["Order Processing", OrderProcessing],
@@ -66,10 +71,20 @@ function Admin() {
       });
     });
 
+    useEffect(() => {
+      setTimeout(() => {
+        setActive(false);
+      }, 1500);
+    });
+
+    useEffect(() => {
+      localStorage.setItem("kk_admin_active_module", activeModule);
+    }, [activeModule]);
+
     return (
       <div
         className={`dock w-[65px] ease-in-out py-1 flex-col fixed 
-          top-1/2 flex justify-around items-center bg-primary z-5 
+          top-1/2 flex justify-around items-center bg-primary z-10 
           text-white text-4xl rounded-4xl -translate-y-1/2 
           ${active ? "right-[15px]" : "-right-[100px]"} transition-all 
           duration-650`}
@@ -114,16 +129,16 @@ function Admin() {
   function MonthPicker() {
     return (
       <div
-        className={`date_picker h-[85px] bg-primary text-white rounded-b-3xl px-4
-          relative`}
+        className={`date_picker h-[85px] bg-primary text-white 
+          rounded-b-3xl px-4 relative z-100`}
       >
         <div
           className={`border border-white rounded-lg p-2 flex w-fit absolute left-1/2 
             top-1/2 -translate-1/2 items-center justify-between cursor-pointer`}
         >
           <DatePicker
-            selected={startDate}
-            onChange={(date) => setStartDate(date)}
+            selected={selectedDate}
+            onChange={(date) => setSelectedDate(date)}
             className="w-[150px]"
           />
           <button className="absolute right-[5px]">
@@ -141,9 +156,354 @@ function Admin() {
   }
 
   function OrderProcessing() {
+    const [activeCategory, setActiveCategory] = useState(
+      localStorage.getItem("kk_admin_orders_category")
+        ? parseInt(localStorage.getItem("kk_admin_orders_category"))
+        : 0
+    );
+    const [prevOrders, setPrevOrders] = useState([]);
+    const [loading, setLoading] = useState(false);
+
+    async function updateOrders() {
+      setLoading(true);
+
+      const orders = await server.getOrdersByDate(formattedDate);
+
+      const sortedOrders = [
+        orders.filter((e) => e.order_status === "Not Confirmed"),
+        orders.filter((e) => e.order_status === "on the way"),
+        orders.filter((e) => e.order_status === "completed"),
+        orders.filter((e) => e.order_status === "failed"),
+      ];
+
+      setPrevOrders(sortedOrders);
+      setLoading(false);
+    }
+
+    useEffect(() => {
+      updateOrders();
+    }, [setPrevOrders]);
+
+    function PreviousOrder() {
+      function OrdersList() {
+        function Order({ data, i }) {
+          // sort food items string into a array
+          function sortFoodOrders(data) {
+            return data.food_order_items
+              .replaceAll('"', "")
+              .split("\n")
+              .filter((e) => e != "");
+          }
+          const food_items = sortFoodOrders(data);
+
+          // edit order status button
+          function EditOrderStatus() {
+            async function handleOrderStatus(data, status) {
+              const response = await helpers.removeDialogBox(
+                "Change Order Status to",
+                status
+              );
+
+              if (response == "removed") {
+                setLoading(true);
+                let newData = { ...data };
+
+                newData.order_status = status;
+                await server.updateOrderStatus(newData);
+                updateOrders();
+
+                helpers.popUpMessage(`order ${data.id} edited`, "success");
+              } else {
+                helpers.popUpMessage("calcelled", "error");
+              }
+            }
+
+            return (
+              <div
+                className="absolute -right-[1px] -bottom-[50px] flex z-0 border-l 
+              border-r border-b border-gray-300 px-2 pb-2 pt-1 rounded-b-2xl 
+              bg-white shadow-md gap-2"
+              >
+                <button
+                  className="text-primary bg-gray-100 rounded-xl py-[1px] 
+                px-[10px] text-2xl active:opacity-50 transition-all shadow 
+                border border-primary"
+                  onClick={() => handleOrderStatus(data, "Not Confirmed")}
+                >
+                  <i className="bx bx-list-ul"></i>
+                </button>
+                <button
+                  className="text-primary bg-gray-100 rounded-xl py-[1px] 
+                px-[10px] text-2xl active:opacity-50 transition-all shadow 
+                border border-primary"
+                  onClick={() => handleOrderStatus(data, "on the way")}
+                >
+                  <i className="bx bx-package"></i>
+                </button>
+                <button
+                  className="text-primary bg-gray-100 rounded-xl py-[1px] 
+                px-[10px] text-2xl active:opacity-50 transition-all shadow 
+                border border-primary"
+                  onClick={() => handleOrderStatus(data, "completed")}
+                >
+                  <i className="bx bx-check"></i>
+                </button>
+                <button
+                  className="text-red-400 bg-gray-100 rounded-xl py-[1px] 
+                px-[10px] text-2xl active:opacity-50 transition-all shadow 
+                border border-red-400"
+                  onClick={() => handleOrderStatus(data, "failed")}
+                >
+                  -
+                </button>
+              </div>
+            );
+          }
+
+          // order details
+          return (
+            <div
+              className="border border-gray-300 rounded-xl p-2 shadow-sm 
+            relative min-h-[100px] mt-9 mb-13 rounded-br-none rounded-tl-none"
+            >
+              <div>
+                <span className="block text-xs text-gray-400">
+                  Order No: {data.id}
+                </span>
+                <h2 className="w-full text-md font-semibold">
+                  {data.restaurant_name}
+                </h2>
+                <span className="text-gray-400 text-xs">
+                  {helpers.formatTimestamp(data.created_at)}
+                </span>
+                <div className="mt-3 flex gap-[1px] flex-col">
+                  {food_items.map((e, i) => {
+                    return (
+                      <span className="block text-xs" key={i}>
+                        {e}
+                      </span>
+                    );
+                  })}
+                </div>
+                <h2 className="pt-3 text-xs">
+                  Address:{" "}
+                  <a
+                    href={data.location_url}
+                    className="text-primary underline"
+                  >
+                    Link
+                  </a>
+                </h2>
+                <div className="flex pb-2 pt-1">
+                  <button
+                    className="text-primary mr-2 text-3xl pt-3 
+                  pr-3 active:opacity-90 transition-all"
+                  >
+                    <a
+                      href={data.location_url}
+                      className="border border-primary px-[8px] pt-[3px] 
+                      rounded-lg"
+                      target="_blank"
+                    >
+                      <i className="bx bx-current-location"></i>
+                    </a>
+                  </button>
+                  <span className="text-xs relative top-[3px]">
+                    {data.address}
+                  </span>
+                </div>
+              </div>
+              <div
+                className="absolute top-[10px] right-[10px] text-xs flex 
+              flex-col items-end"
+              >
+                <span
+                  className={`${
+                    data.order_status == "Confirmed" && "text-black"
+                  } ${
+                    data.order_status == "Not Confirmed" && "text-gray-400"
+                  } ${data.order_status == "failed" && "text-red-400"} ${
+                    data.order_status == "on the way" && "text-primary"
+                  } ${
+                    data.order_status == "completed" && "text-primary"
+                  } font-semibold`}
+                >
+                  {data.order_status}
+                </span>
+                <div className="mt-1 flex">
+                  <span className="text-gray-400">₹{data.total_amount}/-</span>
+                  <span
+                    className="font-normal mx-1 inline-block h-[17px] border-l 
+                    border-gray-400"
+                  ></span>
+                  <span className="text-gray-400">COD</span>
+                </div>
+              </div>
+              <EditOrderStatus />
+              <button
+                className="absolute -top-[42px] -left-[1px] border-t border-l 
+                border-r p-2 text-md rounded-t-xl border-gray-300 px-3 
+                text-white bg-primary font-semibold active:opacity-90 
+                transition-all"
+              >
+                <a href={`tel:${data.phone}`}>Call {data.phone}</a>
+              </button>
+            </div>
+          );
+        }
+
+        // previous orders
+        return prevOrders[activeCategory].length > 0 ? (
+          prevOrders[activeCategory].map((e, i) => {
+            return (
+              <div key={i} className="flex flex-col w-full relative">
+                <Order data={e} i={i} />
+              </div>
+            );
+          })
+        ) : (
+          <h1
+            className="text-3xl font-semibold text-gray-300 absolute 
+          top-1/2 left-1/2 -translate-1/2 text-center"
+          >
+            {activeCategory == 0 && "No Pending Orders"}
+            {activeCategory == 1 && "No Orders For Delivery"}
+            {activeCategory == 2 && "No Completed Orders"}
+            {activeCategory == 3 && "No Failed Orders"}
+          </h1>
+        );
+      }
+
+      // Previous Orders
+      return (
+        <div
+          className="orders flex flex-col items-center mt-3 relative 
+        h-[calc(100vh-200px)] gap-2 pb-24"
+        >
+          {loading ? (
+            <div
+              className="w-[50px] h-[50px] absolute top-1/2 left-1/2 
+            -translate-1/2"
+            >
+              <Spinner />
+            </div>
+          ) : !prevOrders.length ? (
+            <h1 className="text-3xl font-semibold text-gray-400"></h1>
+          ) : (
+            <OrdersList />
+          )}
+        </div>
+      );
+    }
+
+    // Orders Categories
+    function OrdersCategories() {
+      function handleCategoryNumber(i) {
+        localStorage.setItem("kk_admin_orders_category", i);
+        setActiveCategory(i);
+      }
+
+      return (
+        <div
+          className="flex gap-4 bg-gray-100[10] left-1/2 -translate-x-1/2 
+        fixed bottom-0 justify-center pb-3 flex-wrap shadow-lg border pt-[28px] 
+        w-[300px] border-gray-300 rounded-t-xl z-10 bg-white"
+        >
+          <button
+            className={`px-3 py-2 rounded-lg text-2xl bg-white border 
+              border-gray-300 text-gray-500 transition-all opacity-65 
+              relative ${
+                activeCategory === 0 &&
+                `opacity-100 shadow-md border-gray-400 translate-y-[-3px] 
+            scale-125 mx-1`
+              }`}
+            onClick={() => handleCategoryNumber(0)}
+          >
+            <i className="bx bx-list-ul"></i>
+            <span
+              className="absolute text-xs border rounded-xl px-[8px] 
+            py-[2px] font-semibold top-[-12px] right-[-12px] bg-white"
+            >
+              {prevOrders.length ? prevOrders[0].length : "..."}
+            </span>
+          </button>
+          <button
+            className={`px-3 py-2 rounded-lg text-2xl bg-white border 
+              border-gray-300 transition-all opacity-65 relative 
+          ${
+            activeCategory === 1 &&
+            "opacity-100 shadow-md border-gray-400 translate-y-[-3px] scale-125 mx-1"
+          }`}
+            onClick={() => handleCategoryNumber(1)}
+          >
+            <i className="bx bx-package"></i>
+            <span
+              className="absolute text-xs border rounded-xl px-[8px] 
+            py-[2px] font-semibold top-[-12px] right-[-12px] bg-white"
+            >
+              {prevOrders.length ? prevOrders[1].length : "..."}
+            </span>
+          </button>
+          <button
+            className={`px-3 py-2 rounded-lg text-2xl bg-white border 
+              border-gray-300 text-primary opacity-65 transition-all 
+          ${
+            activeCategory === 2 &&
+            "opacity-100 shadow-md border-gray-400 translate-y-[-3px] scale-125 mx-1"
+          } relative`}
+            onClick={() => handleCategoryNumber(2)}
+          >
+            <i className="bx bx-check"></i>{" "}
+            <span
+              className="absolute text-xs border rounded-xl px-[8px] 
+            py-[2px] font-semibold top-[-12px] right-[-12px] bg-white"
+            >
+              {prevOrders.length ? prevOrders[2].length : "..."}
+            </span>
+          </button>
+          <button
+            className={`px-[24px] rounded-lg text-2xl bg-white border 
+              border-gray-300 text-red-400 relative opacity-65 
+          transition-all ${
+            activeCategory === 3 &&
+            `opacity-100 shadow-md border-gray-400 translate-y-[-3px] 
+            scale-125 mx-1 relative`
+          }`}
+            onClick={() => handleCategoryNumber(3)}
+          >
+            <span
+              className="bg-red-400 w-[20px] h-[20px] inline-block 
+            rounded-full absolute left-1/2 top-1/2 -translate-1/2"
+            ></span>
+            <span
+              className="absolute text-xs border rounded-xl px-[8px] 
+          py-[2px] font-semibold top-[-12px] right-[-12px] bg-white"
+            >
+              {prevOrders.length ? prevOrders[3].length : "..."}
+            </span>
+          </button>
+        </div>
+      );
+    }
+
     return (
-      <div className="order_processing w-full min-h-[calc(100dvh-90px)]">
+      <div
+        className="order_processing w-full min-h-[calc(100dvh-90px)] 
+      h-fit pb-[300px]"
+      >
         <MonthPicker />
+        <button
+          className="text-primary flex items-center gap-1 border 
+        rounded-lg px-2 py-1 mt-3 ml-[50%] -translate-x-1/2 
+        active:bg-primary active:text-white transition-all"
+          onClick={updateOrders}
+        >
+          <i className="bx bx-refresh text-3xl "></i>Refresh
+        </button>
+        <OrdersCategories />
+        <div className="px-4 mt-5">
+          <PreviousOrder />
+        </div>
       </div>
     );
   }

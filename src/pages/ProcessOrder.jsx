@@ -1,10 +1,35 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import helpers from "../core/helpers";
+import server from "../core/server";
+
+function Spinner({ primary_color }) {
+  let bg_color, text_color;
+  if (primary_color == "white") {
+    bg_color = "bg-white";
+    text_color = "bg-primary";
+  } else {
+    text_color = "bg-white";
+    bg_color = "bg-primary";
+  }
+
+  return (
+    <div className="w-full h-full relative overflow-hidden rounded-full animate-spin">
+      <span
+        className={`w-[60%] h-full absolute top-1/2 left-1/2 ${bg_color} z-10`}
+      ></span>
+      <span
+        className={`w-full h-full absolute left-0 rounded-full opacity-25 ${bg_color} z-10`}
+      ></span>
+      <span
+        className={`w-[75%] h-[75%] absolute top-1/2 left-1/2 -translate-1/2 ${text_color} rounded-full z-30`}
+      ></span>
+    </div>
+  );
+}
 
 function ProcessOrder({ cartItems, setCartItems }) {
   const navigate = useNavigate();
-  const restaurat_name = localStorage.getItem("kk_active_restaurant");
   const [phone, setPhone] = useState(
     localStorage.getItem("kk_phone") ? localStorage.getItem("kk_phone") : ""
   );
@@ -15,6 +40,7 @@ function ProcessOrder({ cartItems, setCartItems }) {
     localStorage.getItem("kk_name") ? localStorage.getItem("kk_name") : ""
   );
   const [error, setError] = useState();
+  const [loading, setLoading] = useState(false);
 
   function Dishes() {
     return (
@@ -227,43 +253,72 @@ function ProcessOrder({ cartItems, setCartItems }) {
         setError("");
         const response = await helpers.removeDialogBox("Place Order", "");
         if (response == "removed") {
-          helpers.popUpMessage("Order Placed", "success");
-          sendOrderMessage();
-        } else helpers.popUpMessage("Cancelled", "error");
+          const response = await sendOrder();
+          if (response == "Order placed successfully!") goToOrderStatus();
+          else {
+            helpers.popUpMessage("Order Placement Failed", "error");
+            setLoading(false);
+          }
+        } else {
+          helpers.popUpMessage("Cancelled", "error");
+          setLoading(false);
+        }
       } else {
         setError("Minimum Order Value: 100 rupees");
         helpers.popUpMessage("Minimum Order Value: 100 rupees", "error");
       }
     }
 
-    async function sendOrderMessage() {
-      const totalAmount = cartItems.reduce(
-        (total, item) => total + item.price * item.quantity,
-        0
-      );
-
+    async function sendOrder() {
+      const restaurantName = localStorage.getItem("kk_active_restaurant");
+      const address = localStorage.getItem("kk_address");
+      const location_url = localStorage.getItem("kk_location_url");
       let food_order_items = cartItems
         .map(
           (e) =>
             "\n" + JSON.stringify(`${e.name}: ₹${e.price}/-(${e.quantity})`)
         )
         .join("");
+
+      const totalAmount = cartItems.reduce(
+        (total, item) => total + item.price * item.quantity,
+        0
+      );
+
+      const response = await server.addNewOrder(
+        name,
+        restaurantName,
+        food_order_items,
+        phone,
+        address,
+        location_url,
+        totalAmount
+      );
+
+      return response.message;
+    }
+
+    async function goToOrderStatus() {
+      helpers.popUpMessage("Order Placed", "success");
+      setCartItems([]);
+      localStorage.removeItem("kk_cart_items");
+      helpers.popUpMessage("order placed", "success");
+      setLoading(false);
+      setTimeout(async () => {
+        navigate("/orders");
+      }, 100);
+      await sendTelegramMessage();
+    }
+
+    async function sendTelegramMessage() {
       const botToken = import.meta.env.VITE_TELEGRAM_BOT_API;
       const chatId = import.meta.env.VITE_TELEGRAM_CHATID;
-      const restaurantName = localStorage.getItem("kk_active_restaurant");
-      const location = localStorage.getItem("kk_address");
-      const location_url = localStorage.getItem("kk_location_url");
-      const phone = localStorage.getItem("kk_phone");
 
       const message =
-        `📦 *New Order Received!* 📦\n\n` +
-        `*Name:* ${name}` +
-        `🏠 *Restaurant:* ${restaurantName}\n` +
-        `🍔 *Food:* ${food_order_items}` +
-        `📞 *Phone:* ${phone}\n` +
-        `📍 *Address:* ${location}\n` +
-        `📍 *Find on Google Maps:*  ${location_url}\n` +
-        `💰 *Total Cost:* ₹${totalAmount}/-\n\n`;
+        `📢 *New Order Received!* 🚀\n\n` +
+        `🛒 *Order Details:* \n` +
+        `🔗 *[👉 View Order Dashboard 👈] \n` +
+        `(https://www.konaseemakart.in/admin)* \n`;
 
       const telegramUrl = `https://api.telegram.org/bot${botToken}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(
         message
@@ -273,24 +328,10 @@ function ProcessOrder({ cartItems, setCartItems }) {
         .then((response) => response.json())
 
         .then((data) => {
-          if (data.ok) {
-            // Clear the cart
-            setCartItems([]);
-            localStorage.removeItem("kk_cart_items");
-            helpers.popUpMessage("order placed", "success");
-            setTimeout(async () => {
-              await helpers.removeDialogBox(
-                "please wait for order confirmation",
-                "our representative will call you soon"
-              );
-            }, 200);
-
-            navigate("/restaurants");
-          } else {
+          if (!data.ok) {
             helpers.popUpMessage("Error", "error");
           }
         })
-
         .catch((error) => {
           console.error("Error sending message:", error);
 
@@ -300,14 +341,21 @@ function ProcessOrder({ cartItems, setCartItems }) {
 
     return (
       <button
-        className="placeorder border py-3 rounded-xl bg-primary 
+        className="placeorder min-h-[50px] border py-3 rounded-xl bg-primary 
       text-white active:opacity-90 transition-all relative"
         onClick={() => {
           const response = validateOrder();
           if (response == 0) confirmOrder();
         }}
       >
-        Place Order
+        {!loading ? (
+          "Place Order"
+        ) : (
+          <div className="w-[30px] h-[30px] absolute left-1/2 top-1/2 -translate-1/2">
+            <Spinner primary_color={"white"} />
+          </div>
+        )}
+
         <span
           className="text-xs absolute -top-[20px] left-0 text-red-400 
         pl-1 font-semibold"

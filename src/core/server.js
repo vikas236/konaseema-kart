@@ -314,6 +314,120 @@ async function removeDish(restaurant_name, category_name, dish_name) {
   }
 }
 
+async function addNewOrder(
+  name,
+  restaurantName,
+  food_order_items,
+  phone,
+  address,
+  location_url,
+  totalAmount
+) {
+  try {
+    const response = await fetch(server_url + "/add_new_order", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: name,
+        restaurant_name: restaurantName,
+        food_order_items: food_order_items,
+        phone: phone,
+        address: address,
+        location_url: location_url,
+        total_amount: totalAmount,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! addDishImage: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error adding dish image:", error);
+    return null;
+  }
+}
+
+async function updateOrderStatus({
+  id,
+  name,
+  restaurant_name,
+  food_order_items,
+  phone,
+  address,
+  location_url,
+  total_amount,
+  order_status,
+}) {
+  try {
+    const response = await fetch(server_url + "/update_order_status", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        id: id,
+        name: name,
+        restaurant_name: restaurant_name,
+        food_order_items: food_order_items,
+        phone: phone,
+        address: address,
+        location_url: location_url,
+        total_amount: total_amount,
+        order_status: order_status,
+      }),
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP error! Changnig Order Status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Error Changing Order Status:", error);
+    return null;
+  }
+}
+
+async function getUserOrders(phone) {
+  return await fetch(server_url + "/get_user_orders", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      phone: phone,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data.orders;
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
+async function getOrdersByDate(date) {
+  return await fetch(server_url + "/get_orders_by_date", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      date: date,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      return data.orders;
+    })
+    .catch((error) => {
+      console.error("Error:", error);
+    });
+}
+
 export default {
   SearchForTerm,
   greet,
@@ -332,4 +446,8 @@ export default {
   updateDishPrice,
   addNewDish,
   removeDish,
+  addNewOrder,
+  updateOrderStatus,
+  getUserOrders,
+  getOrdersByDate,
 };

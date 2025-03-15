@@ -152,9 +152,23 @@ function Cart({ cartItems, setCartItems }) {
           </button>
         </>
       ) : (
-        <h2 className="w-full h-[calc(100dvh-20px)] text-2xl flex justify-center items-center text-gray-400 font-semibold">
-          No items in cart
-        </h2>
+        <div
+          className="flex flex-col items-center justify-center h-[calc(100dvh-20px)] 
+        gap-3"
+        >
+          <h2
+            className="w-full text-2xl flex justify-center 
+          items-center text-gray-400 font-semibold"
+          >
+            No items in cart
+          </h2>
+          <button
+            className="bg-primary py-2 w-fit px-3 rounded-md 
+          text-white text-lg"
+          >
+            <Link to="/restaurants">Add Items</Link>
+          </button>
+        </div>
       )}
     </div>
   );

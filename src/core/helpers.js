@@ -16,11 +16,15 @@ export function popUpMessage(message, type) {
 
   const span = document.createElement("span");
   span.innerHTML = message;
-  span.className = `fixed bottom-[-125px] left-1/2 -translate-x-[50%] ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 ease-out text-center`;
+  span.className = `fixed bottom-[-125px] left-1/2 -translate-x-[50%] 
+  ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 
+  ease-out text-center z-100`;
   document.querySelector("body").appendChild(span);
 
   setTimeout(() => {
-    span.className = `fixed bottom-[105px] left-1/2 -translate-x-[50%] ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 ease-out text-center`;
+    span.className = `fixed bottom-[105px] left-1/2 -translate-x-[50%] 
+    ${bg_color} px-4 text-xl py-1 rounded-lg transition-all duration-750 
+    ease-out text-center`;
   }, 250);
 
   setTimeout(() => {
@@ -578,6 +582,18 @@ export async function addName(question, value) {
   });
 }
 
+export function formatTimestamp(timestamp) {
+  const date = new Date(timestamp);
+
+  return date.toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  });
+}
+
 export default {
   popUpMessage,
   camelCasing,
@@ -589,4 +605,5 @@ export default {
   addPhoneNumber,
   addAddress,
   addName,
+  formatTimestamp,
 };
