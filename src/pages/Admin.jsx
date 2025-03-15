@@ -32,7 +32,15 @@ function Spinner({ primary_color }) {
 
 function Admin() {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const formattedDate = new Date(selectedDate).toISOString().split("T")[0];
+
+  function getFormattedDate() {
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, "0"); // Month is 0-based
+    const day = String(selectedDate.getDate()).padStart(2, "0");
+
+    const formattedDate = `${year}-${month}-${day}`;
+    return formattedDate;
+  }
 
   const navigate = useNavigate();
   useEffect(() => {
@@ -167,7 +175,7 @@ function Admin() {
     async function updateOrders() {
       setLoading(true);
 
-      const orders = await server.getOrdersByDate(formattedDate);
+      const orders = await server.getOrdersByDate(getFormattedDate());
 
       const sortedOrders = [
         orders.filter((e) => e.order_status === "Not Confirmed"),

@@ -93,7 +93,6 @@ async function removeRestaurant(name) {
 }
 
 async function addNewCategory(name, restaurant_name) {
-  console.log(restaurant_name);
   return await fetch(server_url + "/add_category", {
     method: "POST",
     headers: {
